@@ -8,11 +8,17 @@ RUN npm run build
 
 # Etapa de Produção (Servindo com Nginx)
 FROM nginx:alpine
+
+# Remove o site padrão do nginx para evitar conflitos
+RUN rm -rf /etc/nginx/conf.d/*
+
+# Copia os arquivos gerados pelo build para a pasta do Nginx
 COPY --from=builder /app/.output/public /usr/share/nginx/html
 
-# Adiciona configuração do Nginx para suportar rotas de Single Page Application (SPA)
+# Cria o arquivo de configuração correto do Nginx
 RUN echo 'server { \
     listen 80; \
+    server_name localhost; \
     location / { \
         root /usr/share/nginx/html; \
         index index.html index.htm; \
