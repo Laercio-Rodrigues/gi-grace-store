@@ -38,7 +38,7 @@ function OrderDetail() {
   const addr = (o.address_json as any) ?? {};
 
   const setStatus = async (status: string) => {
-    const { error } = await supabase.from("orders").update({ status }).eq("id", o.id);
+    const { error } = await supabase.from("orders").update({ status: status as any }).eq("id", o.id);
     if (error) return toast.error(error.message);
     toast.success("Status atualizado");
     qc.invalidateQueries({ queryKey: ["admin-order", id] });
