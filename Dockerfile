@@ -9,14 +9,14 @@ RUN npm run build
 # Etapa de Produção (Servindo com Nginx)
 FROM nginx:alpine
 
-# Remove qualquer arquivo padrão do Nginx
-RUN rm -rf /usr/share/nginx/html/*
+# Remove configurações e arquivos padrões do Nginx
 RUN rm -rf /etc/nginx/conf.d/*
+RUN rm -rf /usr/share/nginx/html/*
 
-# Copia o nosso arquivo nginx.conf personalizado
+# Copia a configuração personalizada do Nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copia os arquivos compilados do Nuxt para o diretório web do Nginx
+# Copia os arquivos gerados pelo build para a pasta pública do Nginx
 COPY --from=builder /app/.output/public /usr/share/nginx/html
 
 EXPOSE 80
