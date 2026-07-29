@@ -6,18 +6,19 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# Etapa de Produção (Servindo com Nginx)
-FROM nginx:alpine
+# Etapa de Produção (Node.js rodando o servidor Nitro)
+FROM node:20-alpine
+WORKDIR /app
 
-# Remove configurações e arquivos padrões do Nginx
-RUN rm -rf /etc/nginx/conf.d/*
-RUN rm -rf /usr/share/nginx/html/*
+# Copia apenas os artefatos necessários gerados pelo build
+COPY --from=builder /app/.output ./output
+COPY --from=builder /app/package*.json ./
 
-# Copia a configuração personalizada do Nginx
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Instala apenas as dependências de produção se necessário, ou roda direto o output
+EXPOSE 3000
 
-# Copia os arquivos gerados pelo build para a pasta pública do Nginx
-COPY --from=builder /app/.output/public /usr/share/nginx/html
+ENV HOST=0.0.0.0
+ENV PORT=3000
 
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# Comando para iniciar o servidor Node.js gerado pelo TanStack Start / Nitro
+CMD ["node", "output/server/index.mjs"]
