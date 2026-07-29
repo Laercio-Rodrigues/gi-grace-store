@@ -9,22 +9,14 @@ RUN npm run build
 # Etapa de Produção (Servindo com Nginx)
 FROM nginx:alpine
 
-# Remove o site padrão do nginx para evitar conflitos
+# Remove qualquer configuração padrão pré-existente
 RUN rm -rf /etc/nginx/conf.d/*
 
-# Copia os arquivos gerados pelo build para a pasta do Nginx
-COPY --from=builder /app/.output/public /usr/share/nginx/html
+# Copia o nosso arquivo nginx.conf personalizado para a pasta de configs do Nginx
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Cria o arquivo de configuração correto do Nginx
-RUN echo 'server { \
-    listen 80; \
-    server_name localhost; \
-    location / { \
-        root /usr/share/nginx/html; \
-        index index.html index.htm; \
-        try_files $uri $uri/ /index.html; \
-    } \
-}' > /etc/nginx/conf.d/default.conf
+# Copia os arquivos gerados pelo build do Nuxt/SPA para a pasta pública do Nginx
+COPY --from=builder /app/.output/public /usr/share/nginx/html
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
