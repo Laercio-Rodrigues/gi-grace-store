@@ -36,11 +36,21 @@ function AuthPage() {
     if (user) navigate({ to: (redirect as "/") ?? "/" });
   }, [user, redirect, navigate]);
 
+  const translate = (msg: string) => {
+    if (/Invalid login credentials/i.test(msg)) return "E-mail ou senha incorretos.";
+    if (/User already registered|already registered/i.test(msg))
+      return "Este e-mail já tem conta. Faça login.";
+    if (/Password should be at least/i.test(msg)) return "A senha deve ter no mínimo 6 caracteres.";
+    if (/weak/i.test(msg)) return "Senha muito fraca, escolha outra.";
+    if (/Email not confirmed/i.test(msg)) return "Confirme seu e-mail antes de entrar.";
+    return msg;
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     if (mode === "signup") {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -49,14 +59,19 @@ function AuthPage() {
         },
       });
       setLoading(false);
-      if (error) return toast.error(error.message);
+      if (error) return toast.error(translate(error.message));
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        setMode("login");
+        return toast.error("Este e-mail já tem conta. Faça login.");
+      }
       toast.success("Conta criada! Você já está logado.");
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       setLoading(false);
-      if (error) return toast.error(error.message);
+      if (error) return toast.error(translate(error.message));
     }
   };
+
 
   const google = async () => {
     const r = await lovable.auth.signInWithOAuth("google", {
