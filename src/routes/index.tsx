@@ -14,8 +14,8 @@ export const Route = createFileRoute("/")({
         content:
           "Kimonos trançados, rash guards, faixas oficiais e acessórios das melhores marcas de BJJ. Frete grátis acima de R$ 499.",
       },
-      { property: "og:title", content: "Kimono Store Pro" },
-      { property: "og:description", content: "Equipamento premium para o tatame." },
+      { property: "og:title", content: "Kimono Store Pro — Loja premium de Jiu-Jitsu" },
+      { property: "og:description", content: "Kimonos trançados, rash guards, faixas oficiais e acessórios das melhores marcas de BJJ. Frete grátis acima de R$ 499." },
     ],
   }),
   component: Home,
