@@ -130,7 +130,10 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     letter-spacing: -0.02em;
   }
 }
@@ -140,8 +143,12 @@
   margin-inline: auto;
   padding-inline: 1rem;
   max-width: 80rem;
-  @media (min-width: 640px) { padding-inline: 1.5rem; }
-  @media (min-width: 1024px) { padding-inline: 2rem; }
+  @media (min-width: 640px) {
+    padding-inline: 1.5rem;
+  }
+  @media (min-width: 1024px) {
+    padding-inline: 2rem;
+  }
 }
 
 @utility text-display {
@@ -150,4 +157,14 @@
   letter-spacing: -0.035em;
   line-height: 0.95;
   text-transform: uppercase;
+}
+/* Ocultar selo / badge do Lovable */
+#lovable-badge,
+[data-lovable-badge],
+div[class*="lovable-"],
+a[href*="lovable.dev"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
