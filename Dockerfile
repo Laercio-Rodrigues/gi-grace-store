@@ -6,11 +6,11 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# Etapa de Produção (Node.js rodando o servidor Nitro)
+# Etapa de Produção
 FROM node:20-alpine
 WORKDIR /app
 
-# Copia apenas os artefatos necessários gerados pelo build
+# Copia toda a pasta .output gerada pelo build do Vite/Nitro
 COPY --from=builder /app/.output ./output
 COPY --from=builder /app/package*.json ./
 
@@ -19,5 +19,5 @@ EXPOSE 3000
 ENV HOST=0.0.0.0
 ENV PORT=3000
 
-# Comando para iniciar o servidor Node.js
+# Executa o servidor gerado pelo Nitro
 CMD ["node", "output/server/index.mjs"]
