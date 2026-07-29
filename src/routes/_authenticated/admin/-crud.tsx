@@ -34,7 +34,7 @@ export function CrudTable({ table, title, queryKey, fields, orderBy, orderDesc }
       if (orderBy) q = q.order(orderBy, { ascending: !orderDesc });
       const { data, error } = await q;
       if (error) throw error;
-      return (data ?? []) as Record<string, unknown>[];
+      return (data ?? []) as unknown as Record<string, unknown>[];
     },
   });
 
