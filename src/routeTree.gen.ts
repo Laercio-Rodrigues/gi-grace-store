@@ -19,7 +19,16 @@ import { Route as ProdutoSlugRouteImport } from './routes/produto.$slug'
 import { Route as AuthenticatedFavoritosRouteImport } from './routes/_authenticated/favoritos'
 import { Route as AuthenticatedContaRouteImport } from './routes/_authenticated/conta'
 import { Route as AuthenticatedCheckoutRouteImport } from './routes/_authenticated/checkout'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as AuthenticatedAdminProdutosRouteImport } from './routes/_authenticated/admin/produtos'
+import { Route as AuthenticatedAdminPedidosRouteImport } from './routes/_authenticated/admin/pedidos'
+import { Route as AuthenticatedAdminMarcasRouteImport } from './routes/_authenticated/admin/marcas'
+import { Route as AuthenticatedAdminCuponsRouteImport } from './routes/_authenticated/admin/cupons'
+import { Route as AuthenticatedAdminCategoriasRouteImport } from './routes/_authenticated/admin/categorias'
+import { Route as AuthenticatedAdminBannersRouteImport } from './routes/_authenticated/admin/banners'
+import { Route as AuthenticatedAdminProdutosIdRouteImport } from './routes/_authenticated/admin/produtos.$id'
+import { Route as AuthenticatedAdminPedidosIdRouteImport } from './routes/_authenticated/admin/pedidos.$id'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -70,11 +79,64 @@ const AuthenticatedCheckoutRoute = AuthenticatedCheckoutRouteImport.update({
   path: '/checkout',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
   id: '/admin',
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAdminRouteRoute,
+} as any)
+const AuthenticatedAdminProdutosRoute =
+  AuthenticatedAdminProdutosRouteImport.update({
+    id: '/produtos',
+    path: '/produtos',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminPedidosRoute =
+  AuthenticatedAdminPedidosRouteImport.update({
+    id: '/pedidos',
+    path: '/pedidos',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminMarcasRoute =
+  AuthenticatedAdminMarcasRouteImport.update({
+    id: '/marcas',
+    path: '/marcas',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminCuponsRoute =
+  AuthenticatedAdminCuponsRouteImport.update({
+    id: '/cupons',
+    path: '/cupons',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminCategoriasRoute =
+  AuthenticatedAdminCategoriasRouteImport.update({
+    id: '/categorias',
+    path: '/categorias',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminBannersRoute =
+  AuthenticatedAdminBannersRouteImport.update({
+    id: '/banners',
+    path: '/banners',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminProdutosIdRoute =
+  AuthenticatedAdminProdutosIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAdminProdutosRoute,
+  } as any)
+const AuthenticatedAdminPedidosIdRoute =
+  AuthenticatedAdminPedidosIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAdminPedidosRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -82,11 +144,20 @@ export interface FileRoutesByFullPath {
   '/carrinho': typeof CarrinhoRoute
   '/produtos': typeof ProdutosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/checkout': typeof AuthenticatedCheckoutRoute
   '/conta': typeof AuthenticatedContaRoute
   '/favoritos': typeof AuthenticatedFavoritosRoute
   '/produto/$slug': typeof ProdutoSlugRoute
+  '/admin/banners': typeof AuthenticatedAdminBannersRoute
+  '/admin/categorias': typeof AuthenticatedAdminCategoriasRoute
+  '/admin/cupons': typeof AuthenticatedAdminCuponsRoute
+  '/admin/marcas': typeof AuthenticatedAdminMarcasRoute
+  '/admin/pedidos': typeof AuthenticatedAdminPedidosRouteWithChildren
+  '/admin/produtos': typeof AuthenticatedAdminProdutosRouteWithChildren
+  '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/admin/pedidos/$id': typeof AuthenticatedAdminPedidosIdRoute
+  '/admin/produtos/$id': typeof AuthenticatedAdminProdutosIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -94,11 +165,19 @@ export interface FileRoutesByTo {
   '/carrinho': typeof CarrinhoRoute
   '/produtos': typeof ProdutosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/checkout': typeof AuthenticatedCheckoutRoute
   '/conta': typeof AuthenticatedContaRoute
   '/favoritos': typeof AuthenticatedFavoritosRoute
   '/produto/$slug': typeof ProdutoSlugRoute
+  '/admin/banners': typeof AuthenticatedAdminBannersRoute
+  '/admin/categorias': typeof AuthenticatedAdminCategoriasRoute
+  '/admin/cupons': typeof AuthenticatedAdminCuponsRoute
+  '/admin/marcas': typeof AuthenticatedAdminMarcasRoute
+  '/admin/pedidos': typeof AuthenticatedAdminPedidosRouteWithChildren
+  '/admin/produtos': typeof AuthenticatedAdminProdutosRouteWithChildren
+  '/admin': typeof AuthenticatedAdminIndexRoute
+  '/admin/pedidos/$id': typeof AuthenticatedAdminPedidosIdRoute
+  '/admin/produtos/$id': typeof AuthenticatedAdminProdutosIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -108,11 +187,20 @@ export interface FileRoutesById {
   '/carrinho': typeof CarrinhoRoute
   '/produtos': typeof ProdutosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/checkout': typeof AuthenticatedCheckoutRoute
   '/_authenticated/conta': typeof AuthenticatedContaRoute
   '/_authenticated/favoritos': typeof AuthenticatedFavoritosRoute
   '/produto/$slug': typeof ProdutoSlugRoute
+  '/_authenticated/admin/banners': typeof AuthenticatedAdminBannersRoute
+  '/_authenticated/admin/categorias': typeof AuthenticatedAdminCategoriasRoute
+  '/_authenticated/admin/cupons': typeof AuthenticatedAdminCuponsRoute
+  '/_authenticated/admin/marcas': typeof AuthenticatedAdminMarcasRoute
+  '/_authenticated/admin/pedidos': typeof AuthenticatedAdminPedidosRouteWithChildren
+  '/_authenticated/admin/produtos': typeof AuthenticatedAdminProdutosRouteWithChildren
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/admin/pedidos/$id': typeof AuthenticatedAdminPedidosIdRoute
+  '/_authenticated/admin/produtos/$id': typeof AuthenticatedAdminProdutosIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -127,6 +215,15 @@ export interface FileRouteTypes {
     | '/conta'
     | '/favoritos'
     | '/produto/$slug'
+    | '/admin/banners'
+    | '/admin/categorias'
+    | '/admin/cupons'
+    | '/admin/marcas'
+    | '/admin/pedidos'
+    | '/admin/produtos'
+    | '/admin/'
+    | '/admin/pedidos/$id'
+    | '/admin/produtos/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -134,11 +231,19 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/produtos'
     | '/sitemap.xml'
-    | '/admin'
     | '/checkout'
     | '/conta'
     | '/favoritos'
     | '/produto/$slug'
+    | '/admin/banners'
+    | '/admin/categorias'
+    | '/admin/cupons'
+    | '/admin/marcas'
+    | '/admin/pedidos'
+    | '/admin/produtos'
+    | '/admin'
+    | '/admin/pedidos/$id'
+    | '/admin/produtos/$id'
   id:
     | '__root__'
     | '/'
@@ -152,6 +257,15 @@ export interface FileRouteTypes {
     | '/_authenticated/conta'
     | '/_authenticated/favoritos'
     | '/produto/$slug'
+    | '/_authenticated/admin/banners'
+    | '/_authenticated/admin/categorias'
+    | '/_authenticated/admin/cupons'
+    | '/_authenticated/admin/marcas'
+    | '/_authenticated/admin/pedidos'
+    | '/_authenticated/admin/produtos'
+    | '/_authenticated/admin/'
+    | '/_authenticated/admin/pedidos/$id'
+    | '/_authenticated/admin/produtos/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -240,21 +354,139 @@ declare module '@tanstack/react-router' {
       id: '/_authenticated/admin'
       path: '/admin'
       fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      preLoaderRoute: typeof AuthenticatedAdminRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/produtos': {
+      id: '/_authenticated/admin/produtos'
+      path: '/produtos'
+      fullPath: '/admin/produtos'
+      preLoaderRoute: typeof AuthenticatedAdminProdutosRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/pedidos': {
+      id: '/_authenticated/admin/pedidos'
+      path: '/pedidos'
+      fullPath: '/admin/pedidos'
+      preLoaderRoute: typeof AuthenticatedAdminPedidosRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/marcas': {
+      id: '/_authenticated/admin/marcas'
+      path: '/marcas'
+      fullPath: '/admin/marcas'
+      preLoaderRoute: typeof AuthenticatedAdminMarcasRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/cupons': {
+      id: '/_authenticated/admin/cupons'
+      path: '/cupons'
+      fullPath: '/admin/cupons'
+      preLoaderRoute: typeof AuthenticatedAdminCuponsRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/categorias': {
+      id: '/_authenticated/admin/categorias'
+      path: '/categorias'
+      fullPath: '/admin/categorias'
+      preLoaderRoute: typeof AuthenticatedAdminCategoriasRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/banners': {
+      id: '/_authenticated/admin/banners'
+      path: '/banners'
+      fullPath: '/admin/banners'
+      preLoaderRoute: typeof AuthenticatedAdminBannersRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/produtos/$id': {
+      id: '/_authenticated/admin/produtos/$id'
+      path: '/$id'
+      fullPath: '/admin/produtos/$id'
+      preLoaderRoute: typeof AuthenticatedAdminProdutosIdRouteImport
+      parentRoute: typeof AuthenticatedAdminProdutosRoute
+    }
+    '/_authenticated/admin/pedidos/$id': {
+      id: '/_authenticated/admin/pedidos/$id'
+      path: '/$id'
+      fullPath: '/admin/pedidos/$id'
+      preLoaderRoute: typeof AuthenticatedAdminPedidosIdRouteImport
+      parentRoute: typeof AuthenticatedAdminPedidosRoute
     }
   }
 }
 
+interface AuthenticatedAdminPedidosRouteChildren {
+  AuthenticatedAdminPedidosIdRoute: typeof AuthenticatedAdminPedidosIdRoute
+}
+
+const AuthenticatedAdminPedidosRouteChildren: AuthenticatedAdminPedidosRouteChildren =
+  {
+    AuthenticatedAdminPedidosIdRoute: AuthenticatedAdminPedidosIdRoute,
+  }
+
+const AuthenticatedAdminPedidosRouteWithChildren =
+  AuthenticatedAdminPedidosRoute._addFileChildren(
+    AuthenticatedAdminPedidosRouteChildren,
+  )
+
+interface AuthenticatedAdminProdutosRouteChildren {
+  AuthenticatedAdminProdutosIdRoute: typeof AuthenticatedAdminProdutosIdRoute
+}
+
+const AuthenticatedAdminProdutosRouteChildren: AuthenticatedAdminProdutosRouteChildren =
+  {
+    AuthenticatedAdminProdutosIdRoute: AuthenticatedAdminProdutosIdRoute,
+  }
+
+const AuthenticatedAdminProdutosRouteWithChildren =
+  AuthenticatedAdminProdutosRoute._addFileChildren(
+    AuthenticatedAdminProdutosRouteChildren,
+  )
+
+interface AuthenticatedAdminRouteRouteChildren {
+  AuthenticatedAdminBannersRoute: typeof AuthenticatedAdminBannersRoute
+  AuthenticatedAdminCategoriasRoute: typeof AuthenticatedAdminCategoriasRoute
+  AuthenticatedAdminCuponsRoute: typeof AuthenticatedAdminCuponsRoute
+  AuthenticatedAdminMarcasRoute: typeof AuthenticatedAdminMarcasRoute
+  AuthenticatedAdminPedidosRoute: typeof AuthenticatedAdminPedidosRouteWithChildren
+  AuthenticatedAdminProdutosRoute: typeof AuthenticatedAdminProdutosRouteWithChildren
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+}
+
+const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
+  {
+    AuthenticatedAdminBannersRoute: AuthenticatedAdminBannersRoute,
+    AuthenticatedAdminCategoriasRoute: AuthenticatedAdminCategoriasRoute,
+    AuthenticatedAdminCuponsRoute: AuthenticatedAdminCuponsRoute,
+    AuthenticatedAdminMarcasRoute: AuthenticatedAdminMarcasRoute,
+    AuthenticatedAdminPedidosRoute: AuthenticatedAdminPedidosRouteWithChildren,
+    AuthenticatedAdminProdutosRoute:
+      AuthenticatedAdminProdutosRouteWithChildren,
+    AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+  }
+
+const AuthenticatedAdminRouteRouteWithChildren =
+  AuthenticatedAdminRouteRoute._addFileChildren(
+    AuthenticatedAdminRouteRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
   AuthenticatedCheckoutRoute: typeof AuthenticatedCheckoutRoute
   AuthenticatedContaRoute: typeof AuthenticatedContaRoute
   AuthenticatedFavoritosRoute: typeof AuthenticatedFavoritosRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
   AuthenticatedCheckoutRoute: AuthenticatedCheckoutRoute,
   AuthenticatedContaRoute: AuthenticatedContaRoute,
   AuthenticatedFavoritosRoute: AuthenticatedFavoritosRoute,
@@ -275,13 +507,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
