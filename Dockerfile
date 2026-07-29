@@ -6,19 +6,17 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# Etapa de Produção (Node.js rodando o servidor Nitro)
+# Etapa de Produção (Node.js rodando o servidor)
 FROM node:20-alpine
 WORKDIR /app
 
-# Copia apenas os artefatos necessários gerados pelo build
+# Copia os artefatos gerados pelo build
 COPY --from=builder /app/.output ./output
 COPY --from=builder /app/package*.json ./
 
-# Instala apenas as dependências de produção se necessário, ou roda direto o output
 EXPOSE 3000
 
 ENV HOST=0.0.0.0
 ENV PORT=3000
 
-# Comando para iniciar o servidor Node.js gerado pelo TanStack Start / Nitro
 CMD ["node", "output/server/index.mjs"]
