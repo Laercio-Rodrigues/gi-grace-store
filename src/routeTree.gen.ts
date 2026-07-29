@@ -9,38 +9,198 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ProdutosRouteImport } from './routes/produtos'
+import { Route as CarrinhoRouteImport } from './routes/carrinho'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProdutoSlugRouteImport } from './routes/produto.$slug'
+import { Route as AuthenticatedFavoritosRouteImport } from './routes/_authenticated/favoritos'
+import { Route as AuthenticatedContaRouteImport } from './routes/_authenticated/conta'
+import { Route as AuthenticatedCheckoutRouteImport } from './routes/_authenticated/checkout'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProdutosRoute = ProdutosRouteImport.update({
+  id: '/produtos',
+  path: '/produtos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CarrinhoRoute = CarrinhoRouteImport.update({
+  id: '/carrinho',
+  path: '/carrinho',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProdutoSlugRoute = ProdutoSlugRouteImport.update({
+  id: '/produto/$slug',
+  path: '/produto/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedFavoritosRoute = AuthenticatedFavoritosRouteImport.update({
+  id: '/favoritos',
+  path: '/favoritos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedContaRoute = AuthenticatedContaRouteImport.update({
+  id: '/conta',
+  path: '/conta',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCheckoutRoute = AuthenticatedCheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/carrinho': typeof CarrinhoRoute
+  '/produtos': typeof ProdutosRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/checkout': typeof AuthenticatedCheckoutRoute
+  '/conta': typeof AuthenticatedContaRoute
+  '/favoritos': typeof AuthenticatedFavoritosRoute
+  '/produto/$slug': typeof ProdutoSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/carrinho': typeof CarrinhoRoute
+  '/produtos': typeof ProdutosRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/checkout': typeof AuthenticatedCheckoutRoute
+  '/conta': typeof AuthenticatedContaRoute
+  '/favoritos': typeof AuthenticatedFavoritosRoute
+  '/produto/$slug': typeof ProdutoSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/carrinho': typeof CarrinhoRoute
+  '/produtos': typeof ProdutosRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/checkout': typeof AuthenticatedCheckoutRoute
+  '/_authenticated/conta': typeof AuthenticatedContaRoute
+  '/_authenticated/favoritos': typeof AuthenticatedFavoritosRoute
+  '/produto/$slug': typeof ProdutoSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/carrinho'
+    | '/produtos'
+    | '/sitemap.xml'
+    | '/admin'
+    | '/checkout'
+    | '/conta'
+    | '/favoritos'
+    | '/produto/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/carrinho'
+    | '/produtos'
+    | '/sitemap.xml'
+    | '/admin'
+    | '/checkout'
+    | '/conta'
+    | '/favoritos'
+    | '/produto/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/carrinho'
+    | '/produtos'
+    | '/sitemap.xml'
+    | '/_authenticated/admin'
+    | '/_authenticated/checkout'
+    | '/_authenticated/conta'
+    | '/_authenticated/favoritos'
+    | '/produto/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  CarrinhoRoute: typeof CarrinhoRoute
+  ProdutosRoute: typeof ProdutosRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ProdutoSlugRoute: typeof ProdutoSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/produtos': {
+      id: '/produtos'
+      path: '/produtos'
+      fullPath: '/produtos'
+      preLoaderRoute: typeof ProdutosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/carrinho': {
+      id: '/carrinho'
+      path: '/carrinho'
+      fullPath: '/carrinho'
+      preLoaderRoute: typeof CarrinhoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +208,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/produto/$slug': {
+      id: '/produto/$slug'
+      path: '/produto/$slug'
+      fullPath: '/produto/$slug'
+      preLoaderRoute: typeof ProdutoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/favoritos': {
+      id: '/_authenticated/favoritos'
+      path: '/favoritos'
+      fullPath: '/favoritos'
+      preLoaderRoute: typeof AuthenticatedFavoritosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/conta': {
+      id: '/_authenticated/conta'
+      path: '/conta'
+      fullPath: '/conta'
+      preLoaderRoute: typeof AuthenticatedContaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/checkout': {
+      id: '/_authenticated/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof AuthenticatedCheckoutRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedCheckoutRoute: typeof AuthenticatedCheckoutRoute
+  AuthenticatedContaRoute: typeof AuthenticatedContaRoute
+  AuthenticatedFavoritosRoute: typeof AuthenticatedFavoritosRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedCheckoutRoute: AuthenticatedCheckoutRoute,
+  AuthenticatedContaRoute: AuthenticatedContaRoute,
+  AuthenticatedFavoritosRoute: AuthenticatedFavoritosRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  CarrinhoRoute: CarrinhoRoute,
+  ProdutosRoute: ProdutosRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ProdutoSlugRoute: ProdutoSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
