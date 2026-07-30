@@ -12,4 +12,11 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // O preset padrão do Lovable é o "cloudflare-module" (Cloudflare Workers),
+  // que só exporta um handler fetch() e não abre porta HTTP nenhuma.
+  // Como vamos rodar em Docker/Easypanel (Node puro), forçamos o preset "node-server",
+  // que gera um servidor Node real ouvindo em HOST/PORT — compatível com o Dockerfile.
+  nitro: {
+    preset: "node-server",
+  },
 });
