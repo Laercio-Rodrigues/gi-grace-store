@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth-context";
 import { cx } from "@/lib/format";
 
@@ -72,12 +71,16 @@ function AuthPage() {
     }
   };
 
-
   const google = async () => {
-    const r = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth`,
+      },
     });
-    if (r.error) toast.error("Falha no login com Google");
+    if (error) {
+      toast.error("Falha no login com Google: " + error.message);
+    }
   };
 
   return (
@@ -92,6 +95,7 @@ function AuthPage() {
       </div>
 
       <button
+        type="button"
         onClick={google}
         className="w-full flex items-center justify-center gap-3 h-12 border border-border rounded-md font-semibold hover:bg-surface transition-colors"
       >
@@ -144,6 +148,7 @@ function AuthPage() {
           />
         </div>
         <button
+          type="submit"
           disabled={loading}
           className={cx(
             "w-full h-12 rounded-md font-bold uppercase tracking-widest text-sm transition-colors",
@@ -158,19 +163,21 @@ function AuthPage() {
         {mode === "login" ? (
           <>
             Não tem conta?{" "}
-            <button onClick={() => setMode("signup")} className="font-bold text-brand hover:underline">
+            <button type="button" onClick={() => setMode("signup")} className="font-bold text-brand hover:underline">
               Criar conta
             </button>
           </>
         ) : (
           <>
             Já tem conta?{" "}
-            <button onClick={() => setMode("login")} className="font-bold text-brand hover:underline">
+            <button type="button" onClick={() => setMode("login")} className="font-bold text-brand hover:underline">
               Entrar
             </button>
           </>
         )}
       </div>
     </div>
+  );
+}
   );
 }
