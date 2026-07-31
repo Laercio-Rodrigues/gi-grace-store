@@ -118,27 +118,54 @@ function ProductEditor() {
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
 
   const save = async () => {
-    if (!form.name.trim()) return toast.error("Nome é obrigatório");
-    if (!form.price || Number(form.price) <= 0) return toast.error("Preço inválido");
+    const candidate = {
+      name: form.name.trim(),
+      slug: (form.slug || slugify(form.name)).trim(),
+      description: form.description.trim(),
+      technical_description: form.technical_description.trim(),
+      category_id: form.category_id,
+      brand_id: form.brand_id,
+      price: Number(form.price),
+      sale_price: form.sale_price === "" ? null : Number(form.sale_price),
+      stock: Number(form.stock || 0),
+      sku: form.sku.trim(),
+      weight: form.weight.trim(),
+      material: form.material.trim(),
+      color: form.color.trim(),
+      featured: form.featured,
+      active: form.active,
+    };
+
+    const parsed = productSchema.safeParse(candidate);
+    if (!parsed.success) return toast.error(firstIssue(parsed.error));
+
+    const imgs = productImagesSchema.safeParse(images.map((im) => im.image_url).filter((u) => u.trim()));
+    if (!imgs.success) return toast.error(firstIssue(imgs.error));
+
+    const szParsed = productSizesSchema.safeParse(sizes.filter((s) => s.size_id).map((s) => ({ size_id: s.size_id, stock: Number(s.stock) })));
+    if (!szParsed.success) return toast.error(firstIssue(szParsed.error));
+
     setSaving(true);
     try {
+      const d = parsed.data;
       const payload = {
-        name: form.name.trim(),
-        slug: (form.slug || slugify(form.name)).trim(),
-        description: form.description || null,
-        technical_description: form.technical_description || null,
-        category_id: form.category_id || null,
-        brand_id: form.brand_id || null,
-        price: Number(form.price),
-        sale_price: form.sale_price ? Number(form.sale_price) : null,
-        stock: Number(form.stock) || 0,
-        sku: form.sku || null,
-        weight: form.weight || null,
-        material: form.material || null,
-        color: form.color || null,
-        featured: form.featured,
-        active: form.active,
+        name: d.name,
+        slug: d.slug,
+        description: d.description || null,
+        technical_description: d.technical_description || null,
+        category_id: d.category_id || null,
+        brand_id: d.brand_id || null,
+        price: d.price,
+        sale_price: d.sale_price,
+        stock: d.stock,
+        sku: d.sku || null,
+        weight: d.weight || null,
+        material: d.material || null,
+        color: d.color || null,
+        featured: d.featured,
+        active: d.active,
       };
+
 
       let productId = id;
       if (isNew) {
