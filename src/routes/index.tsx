@@ -87,6 +87,10 @@ function Home() {
           src={heroImage}
           alt="Kimono branco com faixa preta"
           fetchPriority="high"
+          decoding="async"
+          loading="eager"
+          width={1920}
+          height={1080}
           className="absolute inset-0 h-full w-full object-cover opacity-60"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/70 to-transparent" />
@@ -95,9 +99,15 @@ function Home() {
             Nova Coleção
           </span>
           <h1 className="mt-6 text-display text-5xl md:text-7xl lg:text-8xl">
-            Corte.<br />Grip.<br />
-            <span className="text-brand">Domine.</span>
+            <span className="sr-only">
+              Kimono Store Pro — loja premium de kimonos e equipamentos de Jiu-Jitsu
+            </span>
+            <span aria-hidden="true">
+              Corte.<br />Grip.<br />
+              <span className="text-brand">Domine.</span>
+            </span>
           </h1>
+
           <p className="mt-6 text-lg md:text-xl text-primary-foreground/80 max-w-xl">
             Kimonos trançados 550gsm, corte anatômico e reforços premium. Feitos para
             competidores que não aceitam segundo lugar.
