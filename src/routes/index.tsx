@@ -5,6 +5,8 @@ import { fetchCategories, fetchFeatured, fetchProducts } from "@/lib/queries";
 import { ProductCard } from "@/components/product-card";
 import { heroImage, resolveImage } from "@/lib/assets";
 
+const SITE_URL = "https://gi-grace-store.lovable.app";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -16,10 +18,47 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:title", content: "Kimono Store Pro — Loja premium de Jiu-Jitsu" },
       { property: "og:description", content: "Kimonos trançados, rash guards, faixas oficiais e acessórios das melhores marcas de BJJ. Frete grátis acima de R$ 499." },
+      { property: "og:url", content: `${SITE_URL}/` },
+    ],
+    links: [{ rel: "canonical", href: `${SITE_URL}/` }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              "@id": `${SITE_URL}/#organization`,
+              name: "Kimono Store Pro",
+              url: `${SITE_URL}/`,
+              description:
+                "Loja premium de kimonos, rash guards, faixas e acessórios de Jiu-Jitsu.",
+            },
+            {
+              "@type": "WebSite",
+              "@id": `${SITE_URL}/#website`,
+              name: "Kimono Store Pro",
+              url: `${SITE_URL}/`,
+              inLanguage: "pt-BR",
+              publisher: { "@id": `${SITE_URL}/#organization` },
+              potentialAction: {
+                "@type": "SearchAction",
+                target: {
+                  "@type": "EntryPoint",
+                  urlTemplate: `${SITE_URL}/produtos?busca={search_term_string}`,
+                },
+                "query-input": "required name=search_term_string",
+              },
+            },
+          ],
+        }),
+      },
     ],
   }),
   component: Home,
 });
+
 
 const CAT_IMAGES: Record<string, string> = {
   kimonos: "asset:gi-white",
