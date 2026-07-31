@@ -11,16 +11,31 @@ import { ProductCard } from "@/components/product-card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 
+const SITE_URL = "https://gi-grace-store.lovable.app";
+
 export const Route = createFileRoute("/produto/$slug")({
   loader: async ({ params }) => {
     const p = await fetchProductBySlug(params.slug);
     if (!p) throw notFound();
     return { product: p };
   },
-  head: ({ loaderData }) => {
-    const p = loaderData?.product as { name?: string; description?: string } | undefined;
+  head: ({ params, loaderData }) => {
+    const p = loaderData?.product as
+      | {
+          name?: string;
+          description?: string;
+          sku?: string | null;
+          stock?: number;
+          price?: number;
+          sale_price?: number | null;
+          brand?: { name: string } | null;
+          images?: { image_url: string }[];
+        }
+      | undefined;
     const title = p?.name ? `${p.name} — Kimono Store Pro` : "Produto";
     const description = p?.description ?? "Equipamento premium de Jiu-Jitsu.";
+    const url = `${SITE_URL}/produto/${params.slug}`;
+    const image = p?.images?.find((i) => i.image_url?.startsWith("http"))?.image_url;
     return {
       meta: [
         { title },
@@ -28,11 +43,48 @@ export const Route = createFileRoute("/produto/$slug")({
         { property: "og:title", content: title },
         { property: "og:description", content: description },
         { property: "og:type", content: "product" },
+        { property: "og:url", content: url },
+        ...(image
+          ? [
+              { property: "og:image", content: image },
+              { name: "twitter:image", content: image },
+            ]
+          : []),
       ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: p?.name
+        ? [
+            {
+              type: "application/ld+json",
+              children: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "Product",
+                name: p.name,
+                description,
+                sku: p.sku ?? undefined,
+                image: image ? [image] : undefined,
+                brand: p.brand?.name
+                  ? { "@type": "Brand", name: p.brand.name }
+                  : undefined,
+                offers: {
+                  "@type": "Offer",
+                  url,
+                  priceCurrency: "BRL",
+                  price: (p.sale_price ?? p.price ?? 0).toString(),
+                  availability:
+                    (p.stock ?? 0) > 0
+                      ? "https://schema.org/InStock"
+                      : "https://schema.org/OutOfStock",
+                },
+              }),
+            },
+          ]
+        : undefined,
     };
   },
   component: ProductPage,
 });
+
 
 type ProductRow = {
   id: string;
