@@ -52,17 +52,19 @@ export function CrudTable({ table, title, queryKey, fields, orderBy, orderDesc }
 
   const save = async () => {
     if (!editing) return;
-    for (const f of fields) {
-      if (f.required && (editing[f.key] === "" || editing[f.key] == null)) {
-        return toast.error(`${f.label} é obrigatório`);
-      }
+    const result = validateCrudRow(fields, editing);
+    if (!result.ok) {
+      setErrors(result.errors);
+      return toast.error(Object.values(result.errors)[0]);
     }
+    setErrors({});
+
     const payload: Record<string, unknown> = {};
     fields.forEach((f) => {
       const v = editing[f.key];
       if (f.type === "number") payload[f.key] = v === "" || v == null ? null : Number(v);
       else if (f.type === "datetime") payload[f.key] = v ? new Date(v as string).toISOString() : null;
-      else if (f.type === "text") payload[f.key] = v === "" ? null : v;
+      else if (f.type === "text") payload[f.key] = typeof v === "string" ? (v.trim() === "" ? null : v.trim()) : (v ?? null);
       else payload[f.key] = v;
     });
 
@@ -76,6 +78,7 @@ export function CrudTable({ table, title, queryKey, fields, orderBy, orderDesc }
     setEditing(null);
     qc.invalidateQueries({ queryKey: [queryKey] });
   };
+
 
   const remove = async (id: string) => {
     if (!confirm("Excluir este item?")) return;
