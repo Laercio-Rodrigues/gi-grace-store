@@ -544,12 +544,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_order: {
+        Args: {
+          _address: Json
+          _coupon?: string
+          _items: Json
+          _payment_method: string
+        }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      validate_coupon: {
+        Args: { _code: string }
+        Returns: {
+          code: string
+          discount_percent: number
+        }[]
       }
     }
     Enums: {
