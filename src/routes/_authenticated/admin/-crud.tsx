@@ -28,6 +28,8 @@ type Props = {
 export function CrudTable({ table, title, queryKey, fields, orderBy, orderDesc }: Props) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState<Record<string, unknown> | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
 
   const list = useQuery({
     queryKey: [queryKey],
