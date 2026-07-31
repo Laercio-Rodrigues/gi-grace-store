@@ -14,6 +14,9 @@ type CartState = {
   items: CartItem[];
   count: number;
   subtotal: number;
+  coupon: string | null;
+  couponPercent: number;
+  setCoupon: (code: string | null, percent: number) => void;
   addItem: (item: CartItem) => void;
   removeItem: (productId: string, size: string | null) => void;
   updateQty: (productId: string, size: string | null, qty: number) => void;
@@ -22,14 +25,21 @@ type CartState = {
 
 const Ctx = createContext<CartState | null>(null);
 const STORAGE_KEY = "ksp:cart";
+const COUPON_KEY = "ksp:coupon";
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [coupon, setCouponState] = useState<{ code: string | null; percent: number }>({
+    code: null,
+    percent: 0,
+  });
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setItems(JSON.parse(raw));
+      const c = localStorage.getItem(COUPON_KEY);
+      if (c) setCouponState(JSON.parse(c));
     } catch {}
   }, []);
 
@@ -38,6 +48,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     } catch {}
   }, [items]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(COUPON_KEY, JSON.stringify(coupon));
+    } catch {}
+  }, [coupon]);
 
   const value = useMemo<CartState>(() => {
     const count = items.reduce((n, i) => n + i.quantity, 0);
