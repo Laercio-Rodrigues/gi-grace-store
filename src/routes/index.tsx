@@ -5,6 +5,8 @@ import { fetchCategories, fetchFeatured, fetchProducts } from "@/lib/queries";
 import { ProductCard } from "@/components/product-card";
 import { heroImage, resolveImage } from "@/lib/assets";
 
+const SITE_URL = "https://gi-grace-store.lovable.app";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -16,10 +18,47 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:title", content: "Kimono Store Pro — Loja premium de Jiu-Jitsu" },
       { property: "og:description", content: "Kimonos trançados, rash guards, faixas oficiais e acessórios das melhores marcas de BJJ. Frete grátis acima de R$ 499." },
+      { property: "og:url", content: `${SITE_URL}/` },
+    ],
+    links: [{ rel: "canonical", href: `${SITE_URL}/` }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              "@id": `${SITE_URL}/#organization`,
+              name: "Kimono Store Pro",
+              url: `${SITE_URL}/`,
+              description:
+                "Loja premium de kimonos, rash guards, faixas e acessórios de Jiu-Jitsu.",
+            },
+            {
+              "@type": "WebSite",
+              "@id": `${SITE_URL}/#website`,
+              name: "Kimono Store Pro",
+              url: `${SITE_URL}/`,
+              inLanguage: "pt-BR",
+              publisher: { "@id": `${SITE_URL}/#organization` },
+              potentialAction: {
+                "@type": "SearchAction",
+                target: {
+                  "@type": "EntryPoint",
+                  urlTemplate: `${SITE_URL}/produtos?busca={search_term_string}`,
+                },
+                "query-input": "required name=search_term_string",
+              },
+            },
+          ],
+        }),
+      },
     ],
   }),
   component: Home,
 });
+
 
 const CAT_IMAGES: Record<string, string> = {
   kimonos: "asset:gi-white",
@@ -48,6 +87,10 @@ function Home() {
           src={heroImage}
           alt="Kimono branco com faixa preta"
           fetchPriority="high"
+          decoding="async"
+          loading="eager"
+          width={1920}
+          height={1080}
           className="absolute inset-0 h-full w-full object-cover opacity-60"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/70 to-transparent" />
@@ -56,9 +99,15 @@ function Home() {
             Nova Coleção
           </span>
           <h1 className="mt-6 text-display text-5xl md:text-7xl lg:text-8xl">
-            Corte.<br />Grip.<br />
-            <span className="text-brand">Domine.</span>
+            <span className="sr-only">
+              Kimono Store Pro — loja premium de kimonos e equipamentos de Jiu-Jitsu
+            </span>
+            <span aria-hidden="true">
+              Corte.<br />Grip.<br />
+              <span className="text-brand">Domine.</span>
+            </span>
           </h1>
+
           <p className="mt-6 text-lg md:text-xl text-primary-foreground/80 max-w-xl">
             Kimonos trançados 550gsm, corte anatômico e reforços premium. Feitos para
             competidores que não aceitam segundo lugar.

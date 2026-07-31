@@ -4,3 +4,5 @@ Disallow: /admin
 Disallow: /conta
 Disallow: /checkout
 Disallow: /favoritos
+
+Sitemap: https://gi-grace-store.lovable.app/sitemap.xml

@@ -15,8 +15,11 @@ export const Route = createFileRoute("/carrinho")({
       { name: "description", content: "Revise seus itens e finalize sua compra." },
       { property: "og:title", content: "Carrinho — Kimono Store Pro" },
       { property: "og:description", content: "Revise e finalize sua compra." },
+      { property: "og:url", content: "https://gi-grace-store.lovable.app/carrinho" },
     ],
+    links: [{ rel: "canonical", href: "https://gi-grace-store.lovable.app/carrinho" }],
   }),
+
   component: CartPage,
 });
 
