@@ -21,32 +21,32 @@ export const Route = createFileRoute("/carrinho")({
 });
 
 function CartPage() {
-  const { items, subtotal, count, removeItem, updateQty } = useCart();
+  const { items, subtotal, count, removeItem, updateQty, coupon: appliedCoupon, couponPercent, setCoupon } =
+    useCart();
   const { user } = useAuth();
-  const [coupon, setCoupon] = useState("");
-  const [discount, setDiscount] = useState(0);
+  const [coupon, setCouponInput] = useState(appliedCoupon ?? "");
   const [applyingCoupon, setApplyingCoupon] = useState(false);
 
+  const discount = (subtotal * couponPercent) / 100;
   const shipping = subtotal > 499 || subtotal === 0 ? 0 : 39.9;
-  const total = Math.max(0, subtotal - discount + shipping);
+  const total = Math.max(0, subtotal - discount) + shipping;
 
   const applyCoupon = async () => {
-    if (!coupon.trim()) return;
+    const code = coupon.trim().toUpperCase();
+    if (!code || code.length > 40) return;
+    if (!user) return toast.error("Entre na sua conta para usar cupons");
     setApplyingCoupon(true);
-    const { data, error } = await supabase
-      .from("coupons")
-      .select("code, discount_percent, active, expires_at")
-      .eq("code", coupon.trim().toUpperCase())
-      .eq("active", true)
-      .maybeSingle();
+    const { data, error } = await supabase.rpc("validate_coupon", { _code: code });
     setApplyingCoupon(false);
-    if (error || !data) return toast.error("Cupom inválido");
-    if (data.expires_at && new Date(data.expires_at) < new Date())
-      return toast.error("Cupom expirado");
-    const d = (subtotal * data.discount_percent) / 100;
-    setDiscount(d);
-    toast.success(`Cupom aplicado: -${data.discount_percent}%`);
+    const row = data?.[0];
+    if (error || !row) {
+      setCoupon(null, 0);
+      return toast.error("Cupom inválido ou expirado");
+    }
+    setCoupon(row.code, row.discount_percent);
+    toast.success(`Cupom aplicado: -${row.discount_percent}%`);
   };
+
 
   if (count === 0) {
     return (
@@ -146,7 +146,7 @@ function CartPage() {
             <div className="flex gap-2 mt-1.5">
               <input
                 value={coupon}
-                onChange={(e) => setCoupon(e.target.value.toUpperCase())}
+                onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
                 placeholder="BEMVINDO10"
                 className="flex-1 bg-surface border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:border-primary"
               />
