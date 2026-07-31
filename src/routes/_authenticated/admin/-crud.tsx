@@ -3,6 +3,7 @@ import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { validateCrudRow, type FieldRule } from "@/lib/admin-validation";
 
 type FieldType = "text" | "number" | "boolean" | "datetime";
 export type Field = {
@@ -12,6 +13,7 @@ export type Field = {
   required?: boolean;
   mono?: boolean;
   default?: unknown;
+  rule?: FieldRule;
 };
 
 type Props = {
