@@ -11,9 +11,11 @@ export const Route = createFileRoute("/sitemap.xml")({
         const staticEntries = [
           { path: "/", changefreq: "weekly", priority: "1.0" },
           { path: "/produtos", changefreq: "daily", priority: "0.9" },
+          { path: "/guia-faixas", changefreq: "monthly", priority: "0.7" },
           { path: "/carrinho", changefreq: "monthly", priority: "0.3" },
           { path: "/auth", changefreq: "monthly", priority: "0.3" },
         ];
+
         const { data: products } = await supabase
           .from("products")
           .select("slug")
