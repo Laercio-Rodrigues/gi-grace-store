@@ -93,7 +93,7 @@ export function CrudTable({ table, title, queryKey, fields, orderBy, orderDesc }
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold">{title}</h2>
         <button
-          onClick={() => setEditing(emptyRow())}
+          onClick={() => { setErrors({}); setEditing(emptyRow()); }}
           className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:bg-brand transition-colors"
         >
           <Plus className="h-4 w-4" /> Novo
