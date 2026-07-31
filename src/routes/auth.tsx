@@ -16,8 +16,11 @@ export const Route = createFileRoute("/auth")({
       { name: "description", content: "Faça login ou crie sua conta na Kimono Store Pro." },
       { property: "og:title", content: "Entrar — Kimono Store Pro" },
       { property: "og:description", content: "Faça login ou crie sua conta." },
+      { property: "og:url", content: "https://gi-grace-store.lovable.app/auth" },
     ],
+    links: [{ rel: "canonical", href: "https://gi-grace-store.lovable.app/auth" }],
   }),
+
   component: AuthPage,
 });
 
