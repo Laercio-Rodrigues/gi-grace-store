@@ -121,7 +121,7 @@ export function CrudTable({ table, title, queryKey, fields, orderBy, orderDesc }
                   ))}
                   <td className="p-3 text-right">
                     <div className="flex justify-end gap-1">
-                      <button onClick={() => setEditing(row)} className="rounded p-2 hover:bg-surface" title="Editar">
+                      <button onClick={() => { setErrors({}); setEditing(row); }} className="rounded p-2 hover:bg-surface" title="Editar">
                         <Pencil className="h-4 w-4" />
                       </button>
                       <button onClick={() => remove(row.id as string)} className="rounded p-2 text-destructive hover:bg-destructive/10" title="Excluir">
