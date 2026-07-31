@@ -1,11 +1,22 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { useCart } from "@/lib/cart-context";
 import { resolveImage } from "@/lib/assets";
 import { brl } from "@/lib/format";
+
+const addressSchema = z.object({
+  street: z.string().trim().min(3, "Informe a rua").max(120),
+  number: z.string().trim().min(1, "Informe o número").max(20),
+  complement: z.string().trim().max(80).optional().or(z.literal("")),
+  district: z.string().trim().min(2, "Informe o bairro").max(80),
+  city: z.string().trim().min(2, "Informe a cidade").max(80),
+  state: z.string().trim().min(2, "Informe o estado").max(40),
+  zip_code: z.string().trim().min(8, "CEP inválido").max(12),
+});
 
 export const Route = createFileRoute("/_authenticated/checkout")({
   head: () => ({
@@ -21,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/checkout")({
 
 function Checkout() {
   const { user } = useAuth();
-  const { items, subtotal, clear } = useCart();
+  const { items, subtotal, clear, coupon, couponPercent } = useCart();
   const navigate = useNavigate();
   const [placing, setPlacing] = useState(false);
 
@@ -36,54 +47,41 @@ function Checkout() {
   });
   const [payment, setPayment] = useState<"pix" | "credit" | "boleto">("pix");
 
+  const discount = (subtotal * couponPercent) / 100;
   const shipping = subtotal > 499 || subtotal === 0 ? 0 : 39.9;
-  const total = subtotal + shipping;
+  const total = Math.max(0, subtotal - discount) + shipping;
 
   const placeOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || items.length === 0) return;
-    setPlacing(true);
 
-    const { data: order, error } = await supabase
-      .from("orders")
-      .insert({
-        user_id: user.id,
-        status: "pending",
-        subtotal,
-        shipping,
-        discount: 0,
-        total,
-        payment_method: payment,
-        address_json: address,
-      })
-      .select()
-      .single();
-
-    if (error || !order) {
-      setPlacing(false);
-      return toast.error(error?.message ?? "Falha ao criar pedido");
+    const parsed = addressSchema.safeParse(address);
+    if (!parsed.success) {
+      return toast.error(parsed.error.issues[0].message);
     }
 
-    const { error: itemsErr } = await supabase.from("order_items").insert(
-      items.map((i) => ({
-        order_id: order.id,
+    setPlacing(true);
+    const { error } = await supabase.rpc("create_order", {
+      _items: items.map((i) => ({
         product_id: i.productId,
-        product_name: i.name,
-        product_image: i.image,
         size_name: i.size,
         quantity: i.quantity,
-        price: i.price,
       })),
-    );
-    if (itemsErr) {
-      setPlacing(false);
-      return toast.error(itemsErr.message);
+      _address: parsed.data,
+      _payment_method: payment,
+      _coupon: coupon,
+    });
+    setPlacing(false);
+
+    if (error) {
+      return toast.error(error.message || "Falha ao criar pedido");
     }
 
     clear();
     toast.success("Pedido realizado com sucesso!");
     navigate({ to: "/conta" });
   };
+
 
   if (items.length === 0) {
     return (

@@ -146,7 +146,7 @@ function CartPage() {
             <div className="flex gap-2 mt-1.5">
               <input
                 value={coupon}
-                onChange={(e) => setCoupon(e.target.value.toUpperCase())}
+                onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
                 placeholder="BEMVINDO10"
                 className="flex-1 bg-surface border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:border-primary"
               />
