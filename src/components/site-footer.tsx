@@ -38,7 +38,9 @@ export function SiteFooter() {
         <div>
           <h3 className="text-xs font-bold uppercase tracking-widest mb-4">Ajuda</h3>
           <ul className="space-y-2 text-sm text-primary-foreground/70">
+            <li><Link to="/guia-faixas" className="hover:text-brand">Guia de faixas</Link></li>
             <li>Guia de tamanhos</li>
+
             <li>Trocas e devoluções</li>
             <li>Prazo de entrega</li>
             <li>Fale conosco</li>
