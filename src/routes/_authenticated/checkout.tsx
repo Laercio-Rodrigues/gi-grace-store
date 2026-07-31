@@ -69,7 +69,7 @@ function Checkout() {
       })),
       _address: parsed.data,
       _payment_method: payment,
-      _coupon: coupon,
+      _coupon: coupon ?? undefined,
     });
     setPlacing(false);
 
