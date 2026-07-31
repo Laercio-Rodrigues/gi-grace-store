@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage } from "@/lib/assets";
+import { productSchema, productImagesSchema, productSizesSchema, firstIssue } from "@/lib/admin-validation";
 
 export const Route = createFileRoute("/_authenticated/admin/produtos/$id")({
   component: ProductEditor,
