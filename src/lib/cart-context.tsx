@@ -64,6 +64,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       items,
       count,
       subtotal,
+      coupon: coupon.code,
+      couponPercent: coupon.percent,
+      setCoupon: (code, percent) => setCouponState({ code, percent }),
       addItem: (item) =>
         setItems((prev) => {
           const idx = prev.findIndex((p) => same(p, item.productId, item.size));
@@ -80,9 +83,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setItems((prev) =>
           prev.map((p) => (same(p, id, size) ? { ...p, quantity: Math.max(1, qty) } : p)),
         ),
-      clear: () => setItems([]),
+      clear: () => {
+        setItems([]);
+        setCouponState({ code: null, percent: 0 });
+      },
     };
-  }, [items]);
+  }, [items, coupon]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
