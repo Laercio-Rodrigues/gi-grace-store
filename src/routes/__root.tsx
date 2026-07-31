@@ -86,6 +86,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: "Kimonos trançados, rash guards, faixas oficiais e acessórios das melhores marcas de BJJ. Frete grátis acima de R$ 499." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      {
+        name: "google-site-verification",
+        content: "ANVn0LDpeLXkgvDjqvTOjMNcRMh3xkFRecrWkiNI7mU",
+      },
+
       { name: "twitter:title", content: "Kimono Store Pro — Loja premium de Jiu-Jitsu" },
       { name: "twitter:description", content: "Kimonos trançados, rash guards, faixas oficiais e acessórios das melhores marcas de BJJ. Frete grátis acima de R$ 499." },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/125012db-202a-4472-ac86-b5871d21690e" },
