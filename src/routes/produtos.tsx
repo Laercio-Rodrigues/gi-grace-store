@@ -14,6 +14,8 @@ const search = z.object({
   ordem: z.enum(["vendidos", "menor", "maior", "recentes", "promocoes"]).optional(),
 });
 
+const SITE_URL = "https://gi-grace-store.lovable.app";
+
 export const Route = createFileRoute("/produtos")({
   validateSearch: search,
   head: () => ({
@@ -22,10 +24,28 @@ export const Route = createFileRoute("/produtos")({
       { name: "description", content: "Catálogo completo de kimonos, rash guards, faixas e acessórios de Jiu-Jitsu." },
       { property: "og:title", content: "Produtos — Kimono Store Pro" },
       { property: "og:description", content: "Catálogo completo de Jiu-Jitsu." },
+      { property: "og:url", content: `${SITE_URL}/produtos` },
+    ],
+    links: [{ rel: "canonical", href: `${SITE_URL}/produtos` }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Produtos — Kimono Store Pro",
+          description:
+            "Catálogo completo de kimonos, rash guards, faixas e acessórios de Jiu-Jitsu.",
+          url: `${SITE_URL}/produtos`,
+          inLanguage: "pt-BR",
+          isPartOf: { "@id": `${SITE_URL}/#website` },
+        }),
+      },
     ],
   }),
   component: ProductsPage,
 });
+
 
 function ProductsPage() {
   const sp = Route.useSearch();
