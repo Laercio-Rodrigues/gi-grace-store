@@ -167,19 +167,22 @@ export function CrudTable({ table, title, queryKey, fields, orderBy, orderDesc }
                       type="datetime-local"
                       value={editing[f.key] ? String(editing[f.key]).slice(0, 16) : ""}
                       onChange={(e) => setEditing({ ...editing, [f.key]: e.target.value })}
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      className={`w-full rounded-md border bg-background px-3 py-2 text-sm ${errors[f.key] ? "border-destructive" : "border-input"}`}
                     />
                   ) : (
                     <input
                       type={f.type === "number" ? "number" : "text"}
+                      maxLength={f.type === "text" ? (f.rule?.max ?? 200) : undefined}
                       value={(editing[f.key] as any) ?? ""}
                       onChange={(e) => setEditing({ ...editing, [f.key]: e.target.value })}
-                      className={`w-full rounded-md border border-input bg-background px-3 py-2 text-sm ${f.mono ? "font-mono" : ""}`}
+                      className={`w-full rounded-md border bg-background px-3 py-2 text-sm ${f.mono ? "font-mono" : ""} ${errors[f.key] ? "border-destructive" : "border-input"}`}
                     />
                   )}
+                  {errors[f.key] && <p className="mt-1 text-xs font-medium text-destructive">{errors[f.key]}</p>}
                 </div>
               ))}
             </div>
+
             <div className="mt-6 flex justify-end gap-2">
               <button onClick={() => setEditing(null)} className="rounded-md border border-border px-4 py-2 text-sm font-semibold">Cancelar</button>
               <button onClick={save} className="rounded-md bg-primary px-6 py-2 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:bg-brand transition-colors">
