@@ -8,8 +8,8 @@ export const Route = createFileRoute("/_authenticated/admin/cupons")({
       title="Cupons"
       queryKey="admin-coupons"
       fields={[
-        { key: "code", label: "Código", type: "text", required: true, mono: true },
-        { key: "discount_percent", label: "Desconto (%)", type: "number", required: true },
+        { key: "code", label: "Código", type: "text", required: true, mono: true, rule: { format: "coupon", max: 30 } },
+        { key: "discount_percent", label: "Desconto (%)", type: "number", required: true, rule: { int: true, min: 1, max: 90 } },
         { key: "expires_at", label: "Expira em", type: "datetime" },
         { key: "active", label: "Ativo", type: "boolean", default: true },
       ]}
