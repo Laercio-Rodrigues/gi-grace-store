@@ -3,6 +3,7 @@ import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { validateCrudRow, type FieldRule } from "@/lib/admin-validation";
 
 type FieldType = "text" | "number" | "boolean" | "datetime";
 export type Field = {
@@ -12,6 +13,7 @@ export type Field = {
   required?: boolean;
   mono?: boolean;
   default?: unknown;
+  rule?: FieldRule;
 };
 
 type Props = {
@@ -26,6 +28,8 @@ type Props = {
 export function CrudTable({ table, title, queryKey, fields, orderBy, orderDesc }: Props) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState<Record<string, unknown> | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
 
   const list = useQuery({
     queryKey: [queryKey],
@@ -48,17 +52,19 @@ export function CrudTable({ table, title, queryKey, fields, orderBy, orderDesc }
 
   const save = async () => {
     if (!editing) return;
-    for (const f of fields) {
-      if (f.required && (editing[f.key] === "" || editing[f.key] == null)) {
-        return toast.error(`${f.label} é obrigatório`);
-      }
+    const result = validateCrudRow(fields, editing);
+    if (!result.ok) {
+      setErrors(result.errors);
+      return toast.error(Object.values(result.errors)[0]);
     }
+    setErrors({});
+
     const payload: Record<string, unknown> = {};
     fields.forEach((f) => {
       const v = editing[f.key];
       if (f.type === "number") payload[f.key] = v === "" || v == null ? null : Number(v);
       else if (f.type === "datetime") payload[f.key] = v ? new Date(v as string).toISOString() : null;
-      else if (f.type === "text") payload[f.key] = v === "" ? null : v;
+      else if (f.type === "text") payload[f.key] = typeof v === "string" ? (v.trim() === "" ? null : v.trim()) : (v ?? null);
       else payload[f.key] = v;
     });
 
@@ -73,6 +79,7 @@ export function CrudTable({ table, title, queryKey, fields, orderBy, orderDesc }
     qc.invalidateQueries({ queryKey: [queryKey] });
   };
 
+
   const remove = async (id: string) => {
     if (!confirm("Excluir este item?")) return;
     const { error } = await supabase.from(table as any).delete().eq("id", id);
@@ -86,7 +93,7 @@ export function CrudTable({ table, title, queryKey, fields, orderBy, orderDesc }
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold">{title}</h2>
         <button
-          onClick={() => setEditing(emptyRow())}
+          onClick={() => { setErrors({}); setEditing(emptyRow()); }}
           className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:bg-brand transition-colors"
         >
           <Plus className="h-4 w-4" /> Novo
@@ -114,7 +121,7 @@ export function CrudTable({ table, title, queryKey, fields, orderBy, orderDesc }
                   ))}
                   <td className="p-3 text-right">
                     <div className="flex justify-end gap-1">
-                      <button onClick={() => setEditing(row)} className="rounded p-2 hover:bg-surface" title="Editar">
+                      <button onClick={() => { setErrors({}); setEditing(row); }} className="rounded p-2 hover:bg-surface" title="Editar">
                         <Pencil className="h-4 w-4" />
                       </button>
                       <button onClick={() => remove(row.id as string)} className="rounded p-2 text-destructive hover:bg-destructive/10" title="Excluir">
@@ -160,19 +167,22 @@ export function CrudTable({ table, title, queryKey, fields, orderBy, orderDesc }
                       type="datetime-local"
                       value={editing[f.key] ? String(editing[f.key]).slice(0, 16) : ""}
                       onChange={(e) => setEditing({ ...editing, [f.key]: e.target.value })}
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      className={`w-full rounded-md border bg-background px-3 py-2 text-sm ${errors[f.key] ? "border-destructive" : "border-input"}`}
                     />
                   ) : (
                     <input
                       type={f.type === "number" ? "number" : "text"}
+                      maxLength={f.type === "text" ? (f.rule?.max ?? 200) : undefined}
                       value={(editing[f.key] as any) ?? ""}
                       onChange={(e) => setEditing({ ...editing, [f.key]: e.target.value })}
-                      className={`w-full rounded-md border border-input bg-background px-3 py-2 text-sm ${f.mono ? "font-mono" : ""}`}
+                      className={`w-full rounded-md border bg-background px-3 py-2 text-sm ${f.mono ? "font-mono" : ""} ${errors[f.key] ? "border-destructive" : "border-input"}`}
                     />
                   )}
+                  {errors[f.key] && <p className="mt-1 text-xs font-medium text-destructive">{errors[f.key]}</p>}
                 </div>
               ))}
             </div>
+
             <div className="mt-6 flex justify-end gap-2">
               <button onClick={() => setEditing(null)} className="rounded-md border border-border px-4 py-2 text-sm font-semibold">Cancelar</button>
               <button onClick={save} className="rounded-md bg-primary px-6 py-2 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:bg-brand transition-colors">
