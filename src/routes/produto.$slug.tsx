@@ -278,13 +278,22 @@ function ProductPage() {
           {/* qty */}
           <div className="mt-6 flex items-center gap-4">
             <div className="flex items-center border border-border rounded-md">
-              <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="p-3">
+              <button
+                onClick={() => setQty((q) => Math.max(1, q - 1))}
+                className="p-3"
+                aria-label="Diminuir quantidade"
+              >
                 <Minus className="h-4 w-4" />
               </button>
               <span className="min-w-10 text-center font-bold">{qty}</span>
-              <button onClick={() => setQty((q) => q + 1)} className="p-3">
+              <button
+                onClick={() => setQty((q) => q + 1)}
+                className="p-3"
+                aria-label="Aumentar quantidade"
+              >
                 <Plus className="h-4 w-4" />
               </button>
+
             </div>
             <span className="text-xs text-muted-foreground">
               {product.stock} unidades em estoque
