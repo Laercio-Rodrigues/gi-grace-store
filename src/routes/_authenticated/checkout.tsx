@@ -164,6 +164,13 @@ function Checkout() {
               <span className="text-muted-foreground">Subtotal</span>
               <span>{brl(subtotal)}</span>
             </div>
+            {discount > 0 && (
+              <div className="flex justify-between text-brand">
+                <span>Desconto ({couponPercent}%)</span>
+                <span>-{brl(discount)}</span>
+              </div>
+            )}
+
             <div className="flex justify-between">
               <span className="text-muted-foreground">Frete</span>
               <span>{shipping === 0 ? "Grátis" : brl(shipping)}</span>
