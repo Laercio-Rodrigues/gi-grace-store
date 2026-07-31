@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 
-const BASE_URL = "";
+const BASE_URL = "https://gi-grace-store.lovable.app";
 
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
@@ -11,12 +11,15 @@ export const Route = createFileRoute("/sitemap.xml")({
         const staticEntries = [
           { path: "/", changefreq: "weekly", priority: "1.0" },
           { path: "/produtos", changefreq: "daily", priority: "0.9" },
+          { path: "/carrinho", changefreq: "monthly", priority: "0.3" },
+          { path: "/auth", changefreq: "monthly", priority: "0.3" },
         ];
         const { data: products } = await supabase
           .from("products")
           .select("slug")
           .eq("active", true);
         const { data: cats } = await supabase.from("categories").select("slug").eq("active", true);
+
 
         const entries = [
           ...staticEntries,
