@@ -234,3 +234,8 @@ export const round2 = (n: number) => Math.round((Number.isFinite(n) ? n : 0) * 1
 
 export const formatDate = (v: string | null | undefined) =>
   v ? new Date(v).toLocaleDateString("pt-BR", { timeZone: v.length <= 10 ? "UTC" : undefined }) : "—";
+
+/** Primeira mensagem de erro de um ZodError fiscal. */
+export function firstFiscalIssue(error: z.ZodError): string {
+  return error.issues[0]?.message ?? "Dados inválidos";
+}
