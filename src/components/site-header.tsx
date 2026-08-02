@@ -154,7 +154,7 @@ export function SiteHeader() {
                   to={n.to}
                   search={n.search}
                   onClick={() => setOpen(false)}
-                  className="block px-4 py-3 text-base font-medium uppercase tracking-wide border-b border-border/60 hover:bg-surface"
+                  className="block px-4 py-3 text-base font-medium uppercase tracking-wide whitespace-nowrap border-b border-border/60 hover:bg-surface"
                 >
                   {n.label}
                 </Link>
