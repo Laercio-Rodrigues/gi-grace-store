@@ -56,6 +56,42 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_invites: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          invited_by: string | null
+          is_admin: boolean
+          name: string | null
+          note: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          invited_by?: string | null
+          is_admin?: boolean
+          name?: string | null
+          note?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          invited_by?: string | null
+          is_admin?: boolean
+          name?: string | null
+          note?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       banners: {
         Row: {
           active: boolean
@@ -928,6 +964,15 @@ export type Database = {
       admin_set_admin: {
         Args: { _make_admin: boolean; _user_id: string }
         Returns: undefined
+      }
+      admin_upsert_invite: {
+        Args: {
+          _email: string
+          _make_admin: boolean
+          _name: string
+          _note: string
+        }
+        Returns: string
       }
       create_order: {
         Args: {
