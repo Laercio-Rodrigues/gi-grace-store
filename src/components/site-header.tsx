@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { cx } from "@/lib/format";
+import apsLogo from "@/assets/aps-logo.jpg.asset.json";
+
 
 const NAV = [
   { label: "Kimonos", to: "/produtos", search: { categoria: "kimonos" } },
