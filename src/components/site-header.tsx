@@ -57,7 +57,9 @@ export function SiteHeader() {
             alt="APS Kimonos Store"
             width={140}
             height={40}
-            className="h-10 w-auto md:h-11 object-cover rounded-xl ring-1 ring-border shadow-sm"
+            loading="eager"
+            decoding="async"
+            className="h-10 w-auto md:h-11 object-contain rounded-xl ring-1 ring-border shadow-sm bg-white"
           />
           <span className="text-lg md:text-xl font-extrabold uppercase tracking-tight leading-none">
             Kimono<span className="text-brand">Store</span>
@@ -73,7 +75,7 @@ export function SiteHeader() {
               to={n.to}
               search={n.search}
               className={cx(
-                "px-3 py-2 text-sm font-medium uppercase tracking-wide transition-colors hover:text-brand",
+                "px-3 py-2 text-sm font-medium uppercase tracking-wide whitespace-nowrap transition-colors hover:text-brand",
                 pathname === n.to ? "text-foreground" : "text-muted-foreground",
               )}
             >
@@ -125,7 +127,7 @@ export function SiteHeader() {
           <div className="absolute top-0 left-0 h-full w-80 max-w-[85vw] bg-background shadow-2xl flex flex-col">
             <div className="flex items-center justify-between px-4 h-16 border-b border-border">
               <div className="flex items-center gap-2">
-                <img src={apsLogo.url} alt="APS Kimonos Store" width={120} height={34} className="h-9 w-auto object-cover rounded-lg ring-1 ring-border" />
+                <img src={apsLogo.url} alt="APS Kimonos Store" width={120} height={34} className="h-9 w-auto object-contain rounded-lg ring-1 ring-border bg-white" />
                 <span className="text-base font-extrabold uppercase tracking-tight leading-none">
                   Kimono<span className="text-brand">Store</span>
                 </span>
@@ -152,7 +154,7 @@ export function SiteHeader() {
                   to={n.to}
                   search={n.search}
                   onClick={() => setOpen(false)}
-                  className="block px-4 py-3 text-base font-medium uppercase tracking-wide border-b border-border/60 hover:bg-surface"
+                  className="block px-4 py-3 text-base font-medium uppercase tracking-wide whitespace-nowrap border-b border-border/60 hover:bg-surface"
                 >
                   {n.label}
                 </Link>

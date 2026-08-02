@@ -177,7 +177,7 @@ function Home() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
               <div className="absolute inset-x-0 bottom-0 p-3">
-                <div className="text-white text-sm font-bold uppercase tracking-wider">{c.name}</div>
+                <div className="text-white text-sm font-bold uppercase tracking-wider whitespace-nowrap">{c.name}</div>
               </div>
             </Link>
           ))}
