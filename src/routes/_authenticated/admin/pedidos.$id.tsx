@@ -47,11 +47,28 @@ function OrderDetail() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <Link to="/admin/pedidos" className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Voltar
         </Link>
+        <div className="flex gap-2">
+          <Link
+            to="/admin/faturamento/nova"
+            search={{ tipo: "receipt", pedido: o.id }}
+            className="inline-flex items-center gap-2 rounded-md border border-input px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-surface"
+          >
+            <Receipt className="h-4 w-4" /> Faturar sem nota
+          </Link>
+          <Link
+            to="/admin/faturamento/nova"
+            search={{ tipo: "nfe", pedido: o.id }}
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-bold uppercase tracking-wider text-primary-foreground hover:bg-brand"
+          >
+            <FileText className="h-4 w-4" /> Gerar nota fiscal
+          </Link>
+        </div>
       </div>
+
 
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
