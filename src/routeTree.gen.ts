@@ -34,6 +34,7 @@ import { Route as AuthenticatedAdminBannersRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminAdministradoresRouteImport } from './routes/_authenticated/admin/administradores'
 import { Route as AuthenticatedAdminProdutosIdRouteImport } from './routes/_authenticated/admin/produtos.$id'
 import { Route as AuthenticatedAdminPedidosIdRouteImport } from './routes/_authenticated/admin/pedidos.$id'
+import { Route as AuthenticatedAdminFaturamentoNovaRouteImport } from './routes/_authenticated/admin/faturamento.nova'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -171,6 +172,12 @@ const AuthenticatedAdminPedidosIdRoute =
     path: '/$id',
     getParentRoute: () => AuthenticatedAdminPedidosRoute,
   } as any)
+const AuthenticatedAdminFaturamentoNovaRoute =
+  AuthenticatedAdminFaturamentoNovaRouteImport.update({
+    id: '/nova',
+    path: '/nova',
+    getParentRoute: () => AuthenticatedAdminFaturamentoRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -190,11 +197,12 @@ export interface FileRoutesByFullPath {
   '/admin/categorias': typeof AuthenticatedAdminCategoriasRoute
   '/admin/cupons': typeof AuthenticatedAdminCuponsRoute
   '/admin/empresa': typeof AuthenticatedAdminEmpresaRoute
-  '/admin/faturamento': typeof AuthenticatedAdminFaturamentoRoute
+  '/admin/faturamento': typeof AuthenticatedAdminFaturamentoRouteWithChildren
   '/admin/marcas': typeof AuthenticatedAdminMarcasRoute
   '/admin/pedidos': typeof AuthenticatedAdminPedidosRouteWithChildren
   '/admin/produtos': typeof AuthenticatedAdminProdutosRouteWithChildren
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/admin/faturamento/nova': typeof AuthenticatedAdminFaturamentoNovaRoute
   '/admin/pedidos/$id': typeof AuthenticatedAdminPedidosIdRoute
   '/admin/produtos/$id': typeof AuthenticatedAdminProdutosIdRoute
 }
@@ -215,11 +223,12 @@ export interface FileRoutesByTo {
   '/admin/categorias': typeof AuthenticatedAdminCategoriasRoute
   '/admin/cupons': typeof AuthenticatedAdminCuponsRoute
   '/admin/empresa': typeof AuthenticatedAdminEmpresaRoute
-  '/admin/faturamento': typeof AuthenticatedAdminFaturamentoRoute
+  '/admin/faturamento': typeof AuthenticatedAdminFaturamentoRouteWithChildren
   '/admin/marcas': typeof AuthenticatedAdminMarcasRoute
   '/admin/pedidos': typeof AuthenticatedAdminPedidosRouteWithChildren
   '/admin/produtos': typeof AuthenticatedAdminProdutosRouteWithChildren
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/admin/faturamento/nova': typeof AuthenticatedAdminFaturamentoNovaRoute
   '/admin/pedidos/$id': typeof AuthenticatedAdminPedidosIdRoute
   '/admin/produtos/$id': typeof AuthenticatedAdminProdutosIdRoute
 }
@@ -243,11 +252,12 @@ export interface FileRoutesById {
   '/_authenticated/admin/categorias': typeof AuthenticatedAdminCategoriasRoute
   '/_authenticated/admin/cupons': typeof AuthenticatedAdminCuponsRoute
   '/_authenticated/admin/empresa': typeof AuthenticatedAdminEmpresaRoute
-  '/_authenticated/admin/faturamento': typeof AuthenticatedAdminFaturamentoRoute
+  '/_authenticated/admin/faturamento': typeof AuthenticatedAdminFaturamentoRouteWithChildren
   '/_authenticated/admin/marcas': typeof AuthenticatedAdminMarcasRoute
   '/_authenticated/admin/pedidos': typeof AuthenticatedAdminPedidosRouteWithChildren
   '/_authenticated/admin/produtos': typeof AuthenticatedAdminProdutosRouteWithChildren
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/admin/faturamento/nova': typeof AuthenticatedAdminFaturamentoNovaRoute
   '/_authenticated/admin/pedidos/$id': typeof AuthenticatedAdminPedidosIdRoute
   '/_authenticated/admin/produtos/$id': typeof AuthenticatedAdminProdutosIdRoute
 }
@@ -276,6 +286,7 @@ export interface FileRouteTypes {
     | '/admin/pedidos'
     | '/admin/produtos'
     | '/admin/'
+    | '/admin/faturamento/nova'
     | '/admin/pedidos/$id'
     | '/admin/produtos/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -301,6 +312,7 @@ export interface FileRouteTypes {
     | '/admin/pedidos'
     | '/admin/produtos'
     | '/admin'
+    | '/admin/faturamento/nova'
     | '/admin/pedidos/$id'
     | '/admin/produtos/$id'
   id:
@@ -328,6 +340,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/pedidos'
     | '/_authenticated/admin/produtos'
     | '/_authenticated/admin/'
+    | '/_authenticated/admin/faturamento/nova'
     | '/_authenticated/admin/pedidos/$id'
     | '/_authenticated/admin/produtos/$id'
   fileRoutesById: FileRoutesById
@@ -520,8 +533,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPedidosIdRouteImport
       parentRoute: typeof AuthenticatedAdminPedidosRoute
     }
+    '/_authenticated/admin/faturamento/nova': {
+      id: '/_authenticated/admin/faturamento/nova'
+      path: '/nova'
+      fullPath: '/admin/faturamento/nova'
+      preLoaderRoute: typeof AuthenticatedAdminFaturamentoNovaRouteImport
+      parentRoute: typeof AuthenticatedAdminFaturamentoRoute
+    }
   }
 }
+
+interface AuthenticatedAdminFaturamentoRouteChildren {
+  AuthenticatedAdminFaturamentoNovaRoute: typeof AuthenticatedAdminFaturamentoNovaRoute
+}
+
+const AuthenticatedAdminFaturamentoRouteChildren: AuthenticatedAdminFaturamentoRouteChildren =
+  {
+    AuthenticatedAdminFaturamentoNovaRoute:
+      AuthenticatedAdminFaturamentoNovaRoute,
+  }
+
+const AuthenticatedAdminFaturamentoRouteWithChildren =
+  AuthenticatedAdminFaturamentoRoute._addFileChildren(
+    AuthenticatedAdminFaturamentoRouteChildren,
+  )
 
 interface AuthenticatedAdminPedidosRouteChildren {
   AuthenticatedAdminPedidosIdRoute: typeof AuthenticatedAdminPedidosIdRoute
@@ -558,7 +593,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminCategoriasRoute: typeof AuthenticatedAdminCategoriasRoute
   AuthenticatedAdminCuponsRoute: typeof AuthenticatedAdminCuponsRoute
   AuthenticatedAdminEmpresaRoute: typeof AuthenticatedAdminEmpresaRoute
-  AuthenticatedAdminFaturamentoRoute: typeof AuthenticatedAdminFaturamentoRoute
+  AuthenticatedAdminFaturamentoRoute: typeof AuthenticatedAdminFaturamentoRouteWithChildren
   AuthenticatedAdminMarcasRoute: typeof AuthenticatedAdminMarcasRoute
   AuthenticatedAdminPedidosRoute: typeof AuthenticatedAdminPedidosRouteWithChildren
   AuthenticatedAdminProdutosRoute: typeof AuthenticatedAdminProdutosRouteWithChildren
@@ -574,7 +609,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminCategoriasRoute: AuthenticatedAdminCategoriasRoute,
     AuthenticatedAdminCuponsRoute: AuthenticatedAdminCuponsRoute,
     AuthenticatedAdminEmpresaRoute: AuthenticatedAdminEmpresaRoute,
-    AuthenticatedAdminFaturamentoRoute: AuthenticatedAdminFaturamentoRoute,
+    AuthenticatedAdminFaturamentoRoute:
+      AuthenticatedAdminFaturamentoRouteWithChildren,
     AuthenticatedAdminMarcasRoute: AuthenticatedAdminMarcasRoute,
     AuthenticatedAdminPedidosRoute: AuthenticatedAdminPedidosRouteWithChildren,
     AuthenticatedAdminProdutosRoute:
