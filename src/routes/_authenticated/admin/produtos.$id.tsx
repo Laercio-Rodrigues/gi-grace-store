@@ -55,6 +55,21 @@ const EMPTY: Form = {
   active: true,
 };
 
+const EMPTY_FISCAL = {
+  ncm: "",
+  cest: "",
+  cfop: "5102",
+  unit: "UN",
+  origin: "0",
+  cst: "102",
+  icms_rate: "0",
+  ipi_rate: "0",
+  pis_rate: "0",
+  cofins_rate: "0",
+};
+
+
+
 function ProductEditor() {
   const { id } = useParams({ from: "/_authenticated/admin/produtos/$id" });
   const isNew = id === "novo";
