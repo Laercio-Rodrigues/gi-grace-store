@@ -75,7 +75,7 @@ export function SiteHeader() {
               to={n.to}
               search={n.search}
               className={cx(
-                "px-3 py-2 text-sm font-medium uppercase tracking-wide transition-colors hover:text-brand",
+                "px-3 py-2 text-sm font-medium uppercase tracking-wide whitespace-nowrap transition-colors hover:text-brand",
                 pathname === n.to ? "text-foreground" : "text-muted-foreground",
               )}
             >
