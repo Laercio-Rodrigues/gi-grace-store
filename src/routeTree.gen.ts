@@ -35,6 +35,7 @@ import { Route as AuthenticatedAdminAdministradoresRouteImport } from './routes/
 import { Route as AuthenticatedAdminProdutosIdRouteImport } from './routes/_authenticated/admin/produtos.$id'
 import { Route as AuthenticatedAdminPedidosIdRouteImport } from './routes/_authenticated/admin/pedidos.$id'
 import { Route as AuthenticatedAdminFaturamentoNovaRouteImport } from './routes/_authenticated/admin/faturamento.nova'
+import { Route as AuthenticatedAdminFaturamentoIdRouteImport } from './routes/_authenticated/admin/faturamento.$id'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -178,6 +179,12 @@ const AuthenticatedAdminFaturamentoNovaRoute =
     path: '/nova',
     getParentRoute: () => AuthenticatedAdminFaturamentoRoute,
   } as any)
+const AuthenticatedAdminFaturamentoIdRoute =
+  AuthenticatedAdminFaturamentoIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAdminFaturamentoRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -202,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/admin/pedidos': typeof AuthenticatedAdminPedidosRouteWithChildren
   '/admin/produtos': typeof AuthenticatedAdminProdutosRouteWithChildren
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/admin/faturamento/$id': typeof AuthenticatedAdminFaturamentoIdRoute
   '/admin/faturamento/nova': typeof AuthenticatedAdminFaturamentoNovaRoute
   '/admin/pedidos/$id': typeof AuthenticatedAdminPedidosIdRoute
   '/admin/produtos/$id': typeof AuthenticatedAdminProdutosIdRoute
@@ -228,6 +236,7 @@ export interface FileRoutesByTo {
   '/admin/pedidos': typeof AuthenticatedAdminPedidosRouteWithChildren
   '/admin/produtos': typeof AuthenticatedAdminProdutosRouteWithChildren
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/admin/faturamento/$id': typeof AuthenticatedAdminFaturamentoIdRoute
   '/admin/faturamento/nova': typeof AuthenticatedAdminFaturamentoNovaRoute
   '/admin/pedidos/$id': typeof AuthenticatedAdminPedidosIdRoute
   '/admin/produtos/$id': typeof AuthenticatedAdminProdutosIdRoute
@@ -257,6 +266,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/pedidos': typeof AuthenticatedAdminPedidosRouteWithChildren
   '/_authenticated/admin/produtos': typeof AuthenticatedAdminProdutosRouteWithChildren
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/admin/faturamento/$id': typeof AuthenticatedAdminFaturamentoIdRoute
   '/_authenticated/admin/faturamento/nova': typeof AuthenticatedAdminFaturamentoNovaRoute
   '/_authenticated/admin/pedidos/$id': typeof AuthenticatedAdminPedidosIdRoute
   '/_authenticated/admin/produtos/$id': typeof AuthenticatedAdminProdutosIdRoute
@@ -286,6 +296,7 @@ export interface FileRouteTypes {
     | '/admin/pedidos'
     | '/admin/produtos'
     | '/admin/'
+    | '/admin/faturamento/$id'
     | '/admin/faturamento/nova'
     | '/admin/pedidos/$id'
     | '/admin/produtos/$id'
@@ -312,6 +323,7 @@ export interface FileRouteTypes {
     | '/admin/pedidos'
     | '/admin/produtos'
     | '/admin'
+    | '/admin/faturamento/$id'
     | '/admin/faturamento/nova'
     | '/admin/pedidos/$id'
     | '/admin/produtos/$id'
@@ -340,6 +352,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/pedidos'
     | '/_authenticated/admin/produtos'
     | '/_authenticated/admin/'
+    | '/_authenticated/admin/faturamento/$id'
     | '/_authenticated/admin/faturamento/nova'
     | '/_authenticated/admin/pedidos/$id'
     | '/_authenticated/admin/produtos/$id'
@@ -540,15 +553,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFaturamentoNovaRouteImport
       parentRoute: typeof AuthenticatedAdminFaturamentoRoute
     }
+    '/_authenticated/admin/faturamento/$id': {
+      id: '/_authenticated/admin/faturamento/$id'
+      path: '/$id'
+      fullPath: '/admin/faturamento/$id'
+      preLoaderRoute: typeof AuthenticatedAdminFaturamentoIdRouteImport
+      parentRoute: typeof AuthenticatedAdminFaturamentoRoute
+    }
   }
 }
 
 interface AuthenticatedAdminFaturamentoRouteChildren {
+  AuthenticatedAdminFaturamentoIdRoute: typeof AuthenticatedAdminFaturamentoIdRoute
   AuthenticatedAdminFaturamentoNovaRoute: typeof AuthenticatedAdminFaturamentoNovaRoute
 }
 
 const AuthenticatedAdminFaturamentoRouteChildren: AuthenticatedAdminFaturamentoRouteChildren =
   {
+    AuthenticatedAdminFaturamentoIdRoute: AuthenticatedAdminFaturamentoIdRoute,
     AuthenticatedAdminFaturamentoNovaRoute:
       AuthenticatedAdminFaturamentoNovaRoute,
   }
