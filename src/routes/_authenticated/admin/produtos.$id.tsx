@@ -268,14 +268,26 @@ function ProductEditor() {
         <Link to="/admin/produtos" className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Voltar
         </Link>
-        <button
-          onClick={save}
-          disabled={saving}
-          className="rounded-md bg-primary px-6 py-2 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:bg-brand transition-colors disabled:opacity-60"
-        >
-          {saving ? "Salvando..." : isNew ? "Criar produto" : "Salvar alterações"}
-        </button>
+        <div className="flex gap-2">
+          {!isNew && (
+            <Link
+              to="/admin/faturamento/nova"
+              search={{ tipo: "nfe", produto: id }}
+              className="inline-flex items-center gap-2 rounded-md border border-input px-4 py-2 text-sm font-bold uppercase tracking-wider hover:bg-surface"
+            >
+              <FileText className="h-4 w-4" /> Gerar nota
+            </Link>
+          )}
+          <button
+            onClick={save}
+            disabled={saving}
+            className="rounded-md bg-primary px-6 py-2 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:bg-brand transition-colors disabled:opacity-60"
+          >
+            {saving ? "Salvando..." : isNew ? "Criar produto" : "Salvar alterações"}
+          </button>
+        </div>
       </div>
+
 
       <h2 className="text-2xl font-bold">{isNew ? "Novo produto" : form.name || "Editar produto"}</h2>
 
