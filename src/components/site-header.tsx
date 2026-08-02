@@ -125,7 +125,7 @@ export function SiteHeader() {
           <div className="absolute top-0 left-0 h-full w-80 max-w-[85vw] bg-background shadow-2xl flex flex-col">
             <div className="flex items-center justify-between px-4 h-16 border-b border-border">
               <div className="flex items-center gap-2">
-                <img src={apsLogo.url} alt="APS Kimonos Store" width={120} height={34} className="h-8 w-auto object-contain" />
+                <img src={apsLogo.url} alt="APS Kimonos Store" width={120} height={34} className="h-9 w-auto object-cover rounded-lg ring-1 ring-border" />
                 <span className="text-base font-extrabold uppercase tracking-tight leading-none">
                   Kimono<span className="text-brand">Store</span>
                 </span>
