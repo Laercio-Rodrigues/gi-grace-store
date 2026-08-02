@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Instagram, Youtube, MessageCircle } from "lucide-react";
+import apsLogo from "@/assets/aps-logo.jpg.asset.json";
+
 
 export function SiteFooter() {
   return (
