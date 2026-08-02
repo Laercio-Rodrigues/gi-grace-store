@@ -1,11 +1,13 @@
 import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Trash2, Plus } from "lucide-react";
+import { ArrowLeft, Trash2, Plus, FileText } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage } from "@/lib/assets";
 import { productSchema, productImagesSchema, productSizesSchema, firstIssue } from "@/lib/admin-validation";
+import { CFOP_OPTIONS, CST_OPTIONS, ORIGIN_OPTIONS, onlyDigits } from "@/lib/fiscal";
+
 
 export const Route = createFileRoute("/_authenticated/admin/produtos/$id")({
   component: ProductEditor,
@@ -55,6 +57,21 @@ const EMPTY: Form = {
   active: true,
 };
 
+const EMPTY_FISCAL = {
+  ncm: "",
+  cest: "",
+  cfop: "5102",
+  unit: "UN",
+  origin: "0",
+  cst: "102",
+  icms_rate: "0",
+  ipi_rate: "0",
+  pis_rate: "0",
+  cofins_rate: "0",
+};
+
+
+
 function ProductEditor() {
   const { id } = useParams({ from: "/_authenticated/admin/produtos/$id" });
   const isNew = id === "novo";
@@ -63,7 +80,9 @@ function ProductEditor() {
   const [form, setForm] = useState<Form>(EMPTY);
   const [images, setImages] = useState<{ id?: string; image_url: string; position: number }[]>([]);
   const [sizes, setSizes] = useState<{ size_id: string; stock: number }[]>([]);
+  const [fiscal, setFiscal] = useState({ ...EMPTY_FISCAL });
   const [saving, setSaving] = useState(false);
+
 
   const lookups = useQuery({
     queryKey: ["admin-lookups"],
@@ -111,8 +130,22 @@ function ProductEditor() {
         featured: p.featured,
         active: p.active,
       });
+      const pf = p as unknown as Record<string, unknown>;
+      setFiscal({
+        ncm: (pf.ncm as string) ?? "",
+        cest: (pf.cest as string) ?? "",
+        cfop: (pf.cfop as string) ?? "5102",
+        unit: (pf.unit as string) ?? "UN",
+        origin: (pf.origin as string) ?? "0",
+        cst: (pf.cst as string) ?? "102",
+        icms_rate: String(pf.icms_rate ?? 0),
+        ipi_rate: String(pf.ipi_rate ?? 0),
+        pis_rate: String(pf.pis_rate ?? 0),
+        cofins_rate: String(pf.cofins_rate ?? 0),
+      });
       setImages((p.images ?? []).sort((a: any, b: any) => a.position - b.position));
       setSizes((p.sizes ?? []).map((s: any) => ({ size_id: s.size_id, stock: s.stock })));
+
     }
   }, [product.data]);
 
@@ -146,6 +179,9 @@ function ProductEditor() {
     const szParsed = productSizesSchema.safeParse(sizes.filter((s) => s.size_id).map((s) => ({ size_id: s.size_id, stock: Number(s.stock) })));
     if (!szParsed.success) return toast.error(firstIssue(szParsed.error));
 
+    if (fiscal.ncm && onlyDigits(fiscal.ncm).length !== 8) return toast.error("NCM deve ter 8 dígitos");
+    if (fiscal.cfop && onlyDigits(fiscal.cfop).length !== 4) return toast.error("CFOP deve ter 4 dígitos");
+
     setSaving(true);
     try {
       const d = parsed.data;
@@ -165,7 +201,18 @@ function ProductEditor() {
         color: d.color || null,
         featured: d.featured,
         active: d.active,
+        ncm: fiscal.ncm || null,
+        cest: fiscal.cest || null,
+        cfop: fiscal.cfop || null,
+        unit: fiscal.unit || "UN",
+        origin: fiscal.origin || null,
+        cst: fiscal.cst || null,
+        icms_rate: Number(fiscal.icms_rate || 0),
+        ipi_rate: Number(fiscal.ipi_rate || 0),
+        pis_rate: Number(fiscal.pis_rate || 0),
+        cofins_rate: Number(fiscal.cofins_rate || 0),
       };
+
 
 
       let productId = id;
@@ -221,14 +268,26 @@ function ProductEditor() {
         <Link to="/admin/produtos" className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Voltar
         </Link>
-        <button
-          onClick={save}
-          disabled={saving}
-          className="rounded-md bg-primary px-6 py-2 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:bg-brand transition-colors disabled:opacity-60"
-        >
-          {saving ? "Salvando..." : isNew ? "Criar produto" : "Salvar alterações"}
-        </button>
+        <div className="flex gap-2">
+          {!isNew && (
+            <Link
+              to="/admin/faturamento/nova"
+              search={{ tipo: "nfe", produto: id }}
+              className="inline-flex items-center gap-2 rounded-md border border-input px-4 py-2 text-sm font-bold uppercase tracking-wider hover:bg-surface"
+            >
+              <FileText className="h-4 w-4" /> Gerar nota
+            </Link>
+          )}
+          <button
+            onClick={save}
+            disabled={saving}
+            className="rounded-md bg-primary px-6 py-2 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:bg-brand transition-colors disabled:opacity-60"
+          >
+            {saving ? "Salvando..." : isNew ? "Criar produto" : "Salvar alterações"}
+          </button>
+        </div>
       </div>
+
 
       <h2 className="text-2xl font-bold">{isNew ? "Novo produto" : form.name || "Editar produto"}</h2>
 
@@ -364,6 +423,54 @@ function ProductEditor() {
               <input type="checkbox" checked={form.featured} onChange={(e) => set("featured", e.target.checked)} />
             </label>
           </div>
+
+          <div className="rounded-lg border border-border bg-card p-5 space-y-4">
+            <div>
+              <h3 className="font-bold">Dados fiscais</h3>
+              <p className="text-xs text-muted-foreground">Preenchidos automaticamente ao gerar a nota fiscal deste produto.</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="NCM">
+                <input value={fiscal.ncm} onChange={(e) => setFiscal({ ...fiscal, ncm: e.target.value })} placeholder="62031900" className="inp" />
+              </Field>
+              <Field label="CEST">
+                <input value={fiscal.cest} onChange={(e) => setFiscal({ ...fiscal, cest: e.target.value })} className="inp" />
+              </Field>
+              <Field label="Unidade">
+                <input value={fiscal.unit} onChange={(e) => setFiscal({ ...fiscal, unit: e.target.value })} className="inp" />
+              </Field>
+              <Field label="CFOP">
+                <select value={fiscal.cfop} onChange={(e) => setFiscal({ ...fiscal, cfop: e.target.value })} className="inp">
+                  {CFOP_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.value}</option>)}
+                </select>
+              </Field>
+            </div>
+            <Field label="Origem da mercadoria">
+              <select value={fiscal.origin} onChange={(e) => setFiscal({ ...fiscal, origin: e.target.value })} className="inp">
+                {ORIGIN_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </Field>
+            <Field label="CST / CSOSN">
+              <select value={fiscal.cst} onChange={(e) => setFiscal({ ...fiscal, cst: e.target.value })} className="inp">
+                {CST_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="ICMS %">
+                <input type="number" step="0.01" value={fiscal.icms_rate} onChange={(e) => setFiscal({ ...fiscal, icms_rate: e.target.value })} className="inp" />
+              </Field>
+              <Field label="IPI %">
+                <input type="number" step="0.01" value={fiscal.ipi_rate} onChange={(e) => setFiscal({ ...fiscal, ipi_rate: e.target.value })} className="inp" />
+              </Field>
+              <Field label="PIS %">
+                <input type="number" step="0.01" value={fiscal.pis_rate} onChange={(e) => setFiscal({ ...fiscal, pis_rate: e.target.value })} className="inp" />
+              </Field>
+              <Field label="COFINS %">
+                <input type="number" step="0.01" value={fiscal.cofins_rate} onChange={(e) => setFiscal({ ...fiscal, cofins_rate: e.target.value })} className="inp" />
+              </Field>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

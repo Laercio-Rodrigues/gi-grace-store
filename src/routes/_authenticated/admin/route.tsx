@@ -1,5 +1,17 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { BarChart3, Package, ShoppingBag, Tag, Store, Ticket, Image as ImageIcon } from "lucide-react";
+import {
+  BarChart3,
+  Package,
+  ShoppingBag,
+  Tag,
+  Store,
+  Ticket,
+  Image as ImageIcon,
+  Receipt,
+  Barcode,
+  Building2,
+  ShieldCheck,
+} from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { cx } from "@/lib/format";
 
@@ -7,11 +19,16 @@ const TABS = [
   { to: "/admin", label: "Dashboard", icon: BarChart3, exact: true },
   { to: "/admin/produtos", label: "Produtos", icon: Package },
   { to: "/admin/pedidos", label: "Pedidos", icon: ShoppingBag },
+  { to: "/admin/faturamento", label: "Faturamento", icon: Receipt },
+  { to: "/admin/boletos", label: "Boletos", icon: Barcode },
   { to: "/admin/categorias", label: "Categorias", icon: Tag },
   { to: "/admin/marcas", label: "Marcas", icon: Store },
   { to: "/admin/cupons", label: "Cupons", icon: Ticket },
   { to: "/admin/banners", label: "Banners", icon: ImageIcon },
+  { to: "/admin/empresa", label: "Empresa", icon: Building2 },
+  { to: "/admin/administradores", label: "Administradores", icon: ShieldCheck },
 ];
+
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({

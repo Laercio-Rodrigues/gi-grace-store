@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { cx } from "@/lib/format";
+import apsLogo from "@/assets/aps-logo.jpg.asset.json";
+
 
 const NAV = [
   { label: "Kimonos", to: "/produtos", search: { categoria: "kimonos" } },
@@ -49,14 +51,16 @@ export function SiteHeader() {
           <Menu className="h-6 w-6" />
         </button>
 
-        <Link to="/" className="flex items-center gap-2 shrink-0">
-          <div className="grid h-8 w-8 place-items-center bg-primary text-primary-foreground text-display text-sm">
-            K
-          </div>
-          <span className="text-display text-lg tracking-tight hidden sm:inline">
-            Kimono<span className="text-brand">Store</span>
-          </span>
+        <Link to="/" className="flex items-center gap-2 shrink-0" aria-label="APS Kimonos Store — página inicial">
+          <img
+            src={apsLogo.url}
+            alt="APS Kimonos Store"
+            width={140}
+            height={40}
+            className="h-9 w-auto md:h-10 object-contain"
+          />
         </Link>
+
 
         <nav className="hidden lg:flex items-center gap-1 ml-6">
           {NAV.map((n) => (
@@ -116,9 +120,8 @@ export function SiteHeader() {
           <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} />
           <div className="absolute top-0 left-0 h-full w-80 max-w-[85vw] bg-background shadow-2xl flex flex-col">
             <div className="flex items-center justify-between px-4 h-16 border-b border-border">
-              <span className="text-display text-lg">
-                Kimono<span className="text-brand">Store</span>
-              </span>
+              <img src={apsLogo.url} alt="APS Kimonos Store" width={120} height={34} className="h-8 w-auto object-contain" />
+
               <button onClick={() => setOpen(false)} className="p-2" aria-label="Fechar">
                 <X className="h-5 w-5" />
               </button>

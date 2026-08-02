@@ -89,6 +89,60 @@ export type Database = {
         }
         Relationships: []
       }
+      bills: {
+        Row: {
+          amount: number
+          attachment_url: string | null
+          barcode: string | null
+          category: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          due_date: string
+          id: string
+          notes: string | null
+          paid_amount: number | null
+          paid_at: string | null
+          status: Database["public"]["Enums"]["bill_status"]
+          supplier: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          attachment_url?: string | null
+          barcode?: string | null
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description: string
+          due_date: string
+          id?: string
+          notes?: string | null
+          paid_amount?: number | null
+          paid_at?: string | null
+          status?: Database["public"]["Enums"]["bill_status"]
+          supplier?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          attachment_url?: string | null
+          barcode?: string | null
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          due_date?: string
+          id?: string
+          notes?: string | null
+          paid_amount?: number | null
+          paid_at?: string | null
+          status?: Database["public"]["Enums"]["bill_status"]
+          supplier?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       brands: {
         Row: {
           created_at: string
@@ -140,6 +194,81 @@ export type Database = {
           name?: string
           position?: number
           slug?: string
+        }
+        Relationships: []
+      }
+      company_settings: {
+        Row: {
+          city: string
+          city_code: string | null
+          cnpj: string
+          complement: string | null
+          created_at: string
+          crt: string
+          district: string
+          email: string | null
+          id: string
+          ie: string
+          im: string | null
+          legal_name: string
+          logo_url: string | null
+          nfe_series: string
+          number: string
+          phone: string | null
+          singleton: boolean
+          state: string
+          street: string
+          trade_name: string
+          updated_at: string
+          zip_code: string
+        }
+        Insert: {
+          city?: string
+          city_code?: string | null
+          cnpj?: string
+          complement?: string | null
+          created_at?: string
+          crt?: string
+          district?: string
+          email?: string | null
+          id?: string
+          ie?: string
+          im?: string | null
+          legal_name?: string
+          logo_url?: string | null
+          nfe_series?: string
+          number?: string
+          phone?: string | null
+          singleton?: boolean
+          state?: string
+          street?: string
+          trade_name?: string
+          updated_at?: string
+          zip_code?: string
+        }
+        Update: {
+          city?: string
+          city_code?: string | null
+          cnpj?: string
+          complement?: string | null
+          created_at?: string
+          crt?: string
+          district?: string
+          email?: string | null
+          id?: string
+          ie?: string
+          im?: string | null
+          legal_name?: string
+          logo_url?: string | null
+          nfe_series?: string
+          number?: string
+          phone?: string | null
+          singleton?: boolean
+          state?: string
+          street?: string
+          trade_name?: string
+          updated_at?: string
+          zip_code?: string
         }
         Relationships: []
       }
@@ -195,6 +324,191 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_items: {
+        Row: {
+          cest: string | null
+          cfop: string | null
+          code: string | null
+          cofins_rate: number
+          cofins_value: number
+          created_at: string
+          cst: string | null
+          description: string
+          discount: number
+          icms_base: number
+          icms_rate: number
+          icms_value: number
+          id: string
+          invoice_id: string
+          ipi_rate: number
+          ipi_value: number
+          ncm: string | null
+          origin: string | null
+          pis_rate: number
+          pis_value: number
+          position: number
+          product_id: string | null
+          quantity: number
+          total: number
+          unit: string
+          unit_price: number
+        }
+        Insert: {
+          cest?: string | null
+          cfop?: string | null
+          code?: string | null
+          cofins_rate?: number
+          cofins_value?: number
+          created_at?: string
+          cst?: string | null
+          description: string
+          discount?: number
+          icms_base?: number
+          icms_rate?: number
+          icms_value?: number
+          id?: string
+          invoice_id: string
+          ipi_rate?: number
+          ipi_value?: number
+          ncm?: string | null
+          origin?: string | null
+          pis_rate?: number
+          pis_value?: number
+          position?: number
+          product_id?: string | null
+          quantity?: number
+          total?: number
+          unit?: string
+          unit_price?: number
+        }
+        Update: {
+          cest?: string | null
+          cfop?: string | null
+          code?: string | null
+          cofins_rate?: number
+          cofins_value?: number
+          created_at?: string
+          cst?: string | null
+          description?: string
+          discount?: number
+          icms_base?: number
+          icms_rate?: number
+          icms_value?: number
+          id?: string
+          invoice_id?: string
+          ipi_rate?: number
+          ipi_value?: number
+          ncm?: string | null
+          origin?: string | null
+          pis_rate?: number
+          pis_value?: number
+          position?: number
+          product_id?: string | null
+          quantity?: number
+          total?: number
+          unit?: string
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          customer_doc: string | null
+          customer_email: string | null
+          customer_name: string
+          discount: number
+          id: string
+          issued_at: string
+          notes: string | null
+          number: number
+          order_id: string | null
+          other_expenses: number
+          payload: Json
+          payment_method: string | null
+          products_total: number
+          series: string
+          shipping: number
+          status: Database["public"]["Enums"]["invoice_status"]
+          tax_total: number
+          total: number
+          type: Database["public"]["Enums"]["invoice_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_doc?: string | null
+          customer_email?: string | null
+          customer_name: string
+          discount?: number
+          id?: string
+          issued_at?: string
+          notes?: string | null
+          number: number
+          order_id?: string | null
+          other_expenses?: number
+          payload?: Json
+          payment_method?: string | null
+          products_total?: number
+          series?: string
+          shipping?: number
+          status?: Database["public"]["Enums"]["invoice_status"]
+          tax_total?: number
+          total?: number
+          type: Database["public"]["Enums"]["invoice_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_doc?: string | null
+          customer_email?: string | null
+          customer_name?: string
+          discount?: number
+          id?: string
+          issued_at?: string
+          notes?: string | null
+          number?: number
+          order_id?: string | null
+          other_expenses?: number
+          payload?: Json
+          payment_method?: string | null
+          products_total?: number
+          series?: string
+          shipping?: number
+          status?: Database["public"]["Enums"]["invoice_status"]
+          tax_total?: number
+          total?: number
+          type?: Database["public"]["Enums"]["invoice_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]
@@ -359,13 +673,22 @@ export type Database = {
           active: boolean
           brand_id: string | null
           category_id: string | null
+          cest: string | null
+          cfop: string | null
+          cofins_rate: number
           color: string | null
           created_at: string
+          cst: string | null
           description: string | null
           featured: boolean
+          icms_rate: number
           id: string
+          ipi_rate: number
           material: string | null
           name: string
+          ncm: string | null
+          origin: string | null
+          pis_rate: number
           price: number
           sale_price: number | null
           sales_count: number
@@ -373,6 +696,7 @@ export type Database = {
           slug: string
           stock: number
           technical_description: string | null
+          unit: string
           updated_at: string
           weight: string | null
         }
@@ -380,13 +704,22 @@ export type Database = {
           active?: boolean
           brand_id?: string | null
           category_id?: string | null
+          cest?: string | null
+          cfop?: string | null
+          cofins_rate?: number
           color?: string | null
           created_at?: string
+          cst?: string | null
           description?: string | null
           featured?: boolean
+          icms_rate?: number
           id?: string
+          ipi_rate?: number
           material?: string | null
           name: string
+          ncm?: string | null
+          origin?: string | null
+          pis_rate?: number
           price: number
           sale_price?: number | null
           sales_count?: number
@@ -394,6 +727,7 @@ export type Database = {
           slug: string
           stock?: number
           technical_description?: string | null
+          unit?: string
           updated_at?: string
           weight?: string | null
         }
@@ -401,13 +735,22 @@ export type Database = {
           active?: boolean
           brand_id?: string | null
           category_id?: string | null
+          cest?: string | null
+          cfop?: string | null
+          cofins_rate?: number
           color?: string | null
           created_at?: string
+          cst?: string | null
           description?: string | null
           featured?: boolean
+          icms_rate?: number
           id?: string
+          ipi_rate?: number
           material?: string | null
           name?: string
+          ncm?: string | null
+          origin?: string | null
+          pis_rate?: number
           price?: number
           sale_price?: number | null
           sales_count?: number
@@ -415,6 +758,7 @@ export type Database = {
           slug?: string
           stock?: number
           technical_description?: string | null
+          unit?: string
           updated_at?: string
           weight?: string | null
         }
@@ -500,6 +844,33 @@ export type Database = {
           },
         ]
       }
+      role_audit: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          target_user_id: string
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          target_user_id: string
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          target_user_id?: string
+        }
+        Relationships: []
+      }
       sizes: {
         Row: {
           id: string
@@ -544,6 +915,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_list_users: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          is_admin: boolean
+          name: string
+          user_id: string
+        }[]
+      }
+      admin_set_admin: {
+        Args: { _make_admin: boolean; _user_id: string }
+        Returns: undefined
+      }
       create_order: {
         Args: {
           _address: Json
@@ -560,6 +945,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      next_invoice_number: {
+        Args: {
+          _series: string
+          _type: Database["public"]["Enums"]["invoice_type"]
+        }
+        Returns: number
+      }
       validate_coupon: {
         Args: { _code: string }
         Returns: {
@@ -570,6 +962,9 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "customer"
+      bill_status: "pending" | "paid" | "cancelled"
+      invoice_status: "issued" | "paid" | "cancelled"
+      invoice_type: "receipt" | "nfe"
       order_status: "pending" | "paid" | "shipped" | "delivered" | "cancelled"
     }
     CompositeTypes: {
@@ -699,6 +1094,9 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "customer"],
+      bill_status: ["pending", "paid", "cancelled"],
+      invoice_status: ["issued", "paid", "cancelled"],
+      invoice_type: ["receipt", "nfe"],
       order_status: ["pending", "paid", "shipped", "delivered", "cancelled"],
     },
   },

@@ -168,3 +168,38 @@ a[href*="lovable.dev"] {
   opacity: 0 !important;
   pointer-events: none !important;
 }
+
+@utility inp {
+  width: 100%;
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-input, hsl(0 0% 88%));
+  background-color: var(--color-background);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--color-foreground);
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary);
+  }
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    padding: 0;
+    background: #fff;
+    color: #000;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
