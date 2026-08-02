@@ -63,7 +63,9 @@ function ProductEditor() {
   const [form, setForm] = useState<Form>(EMPTY);
   const [images, setImages] = useState<{ id?: string; image_url: string; position: number }[]>([]);
   const [sizes, setSizes] = useState<{ size_id: string; stock: number }[]>([]);
+  const [fiscal, setFiscal] = useState({ ...EMPTY_FISCAL });
   const [saving, setSaving] = useState(false);
+
 
   const lookups = useQuery({
     queryKey: ["admin-lookups"],
