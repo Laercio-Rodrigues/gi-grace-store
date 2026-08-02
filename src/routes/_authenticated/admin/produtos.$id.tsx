@@ -1,11 +1,13 @@
 import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Trash2, Plus } from "lucide-react";
+import { ArrowLeft, Trash2, Plus, FileText } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage } from "@/lib/assets";
 import { productSchema, productImagesSchema, productSizesSchema, firstIssue } from "@/lib/admin-validation";
+import { CFOP_OPTIONS, CST_OPTIONS, ORIGIN_OPTIONS, onlyDigits } from "@/lib/fiscal";
+
 
 export const Route = createFileRoute("/_authenticated/admin/produtos/$id")({
   component: ProductEditor,
