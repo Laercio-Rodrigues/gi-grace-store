@@ -25,6 +25,7 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminProdutosRouteImport } from './routes/_authenticated/admin/produtos'
 import { Route as AuthenticatedAdminPedidosRouteImport } from './routes/_authenticated/admin/pedidos'
 import { Route as AuthenticatedAdminMarcasRouteImport } from './routes/_authenticated/admin/marcas'
+import { Route as AuthenticatedAdminFaturamentoRouteImport } from './routes/_authenticated/admin/faturamento'
 import { Route as AuthenticatedAdminEmpresaRouteImport } from './routes/_authenticated/admin/empresa'
 import { Route as AuthenticatedAdminCuponsRouteImport } from './routes/_authenticated/admin/cupons'
 import { Route as AuthenticatedAdminCategoriasRouteImport } from './routes/_authenticated/admin/categorias'
@@ -116,6 +117,12 @@ const AuthenticatedAdminMarcasRoute =
     path: '/marcas',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminFaturamentoRoute =
+  AuthenticatedAdminFaturamentoRouteImport.update({
+    id: '/faturamento',
+    path: '/faturamento',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminEmpresaRoute =
   AuthenticatedAdminEmpresaRouteImport.update({
     id: '/empresa',
@@ -183,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/admin/categorias': typeof AuthenticatedAdminCategoriasRoute
   '/admin/cupons': typeof AuthenticatedAdminCuponsRoute
   '/admin/empresa': typeof AuthenticatedAdminEmpresaRoute
+  '/admin/faturamento': typeof AuthenticatedAdminFaturamentoRoute
   '/admin/marcas': typeof AuthenticatedAdminMarcasRoute
   '/admin/pedidos': typeof AuthenticatedAdminPedidosRouteWithChildren
   '/admin/produtos': typeof AuthenticatedAdminProdutosRouteWithChildren
@@ -207,6 +215,7 @@ export interface FileRoutesByTo {
   '/admin/categorias': typeof AuthenticatedAdminCategoriasRoute
   '/admin/cupons': typeof AuthenticatedAdminCuponsRoute
   '/admin/empresa': typeof AuthenticatedAdminEmpresaRoute
+  '/admin/faturamento': typeof AuthenticatedAdminFaturamentoRoute
   '/admin/marcas': typeof AuthenticatedAdminMarcasRoute
   '/admin/pedidos': typeof AuthenticatedAdminPedidosRouteWithChildren
   '/admin/produtos': typeof AuthenticatedAdminProdutosRouteWithChildren
@@ -234,6 +243,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/categorias': typeof AuthenticatedAdminCategoriasRoute
   '/_authenticated/admin/cupons': typeof AuthenticatedAdminCuponsRoute
   '/_authenticated/admin/empresa': typeof AuthenticatedAdminEmpresaRoute
+  '/_authenticated/admin/faturamento': typeof AuthenticatedAdminFaturamentoRoute
   '/_authenticated/admin/marcas': typeof AuthenticatedAdminMarcasRoute
   '/_authenticated/admin/pedidos': typeof AuthenticatedAdminPedidosRouteWithChildren
   '/_authenticated/admin/produtos': typeof AuthenticatedAdminProdutosRouteWithChildren
@@ -261,6 +271,7 @@ export interface FileRouteTypes {
     | '/admin/categorias'
     | '/admin/cupons'
     | '/admin/empresa'
+    | '/admin/faturamento'
     | '/admin/marcas'
     | '/admin/pedidos'
     | '/admin/produtos'
@@ -285,6 +296,7 @@ export interface FileRouteTypes {
     | '/admin/categorias'
     | '/admin/cupons'
     | '/admin/empresa'
+    | '/admin/faturamento'
     | '/admin/marcas'
     | '/admin/pedidos'
     | '/admin/produtos'
@@ -311,6 +323,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/categorias'
     | '/_authenticated/admin/cupons'
     | '/_authenticated/admin/empresa'
+    | '/_authenticated/admin/faturamento'
     | '/_authenticated/admin/marcas'
     | '/_authenticated/admin/pedidos'
     | '/_authenticated/admin/produtos'
@@ -444,6 +457,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMarcasRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/faturamento': {
+      id: '/_authenticated/admin/faturamento'
+      path: '/faturamento'
+      fullPath: '/admin/faturamento'
+      preLoaderRoute: typeof AuthenticatedAdminFaturamentoRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/empresa': {
       id: '/_authenticated/admin/empresa'
       path: '/empresa'
@@ -538,6 +558,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminCategoriasRoute: typeof AuthenticatedAdminCategoriasRoute
   AuthenticatedAdminCuponsRoute: typeof AuthenticatedAdminCuponsRoute
   AuthenticatedAdminEmpresaRoute: typeof AuthenticatedAdminEmpresaRoute
+  AuthenticatedAdminFaturamentoRoute: typeof AuthenticatedAdminFaturamentoRoute
   AuthenticatedAdminMarcasRoute: typeof AuthenticatedAdminMarcasRoute
   AuthenticatedAdminPedidosRoute: typeof AuthenticatedAdminPedidosRouteWithChildren
   AuthenticatedAdminProdutosRoute: typeof AuthenticatedAdminProdutosRouteWithChildren
@@ -553,6 +574,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminCategoriasRoute: AuthenticatedAdminCategoriasRoute,
     AuthenticatedAdminCuponsRoute: AuthenticatedAdminCuponsRoute,
     AuthenticatedAdminEmpresaRoute: AuthenticatedAdminEmpresaRoute,
+    AuthenticatedAdminFaturamentoRoute: AuthenticatedAdminFaturamentoRoute,
     AuthenticatedAdminMarcasRoute: AuthenticatedAdminMarcasRoute,
     AuthenticatedAdminPedidosRoute: AuthenticatedAdminPedidosRouteWithChildren,
     AuthenticatedAdminProdutosRoute:
