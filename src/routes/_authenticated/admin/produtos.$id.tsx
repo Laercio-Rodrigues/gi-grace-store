@@ -423,6 +423,54 @@ function ProductEditor() {
               <input type="checkbox" checked={form.featured} onChange={(e) => set("featured", e.target.checked)} />
             </label>
           </div>
+
+          <div className="rounded-lg border border-border bg-card p-5 space-y-4">
+            <div>
+              <h3 className="font-bold">Dados fiscais</h3>
+              <p className="text-xs text-muted-foreground">Preenchidos automaticamente ao gerar a nota fiscal deste produto.</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="NCM">
+                <input value={fiscal.ncm} onChange={(e) => setFiscal({ ...fiscal, ncm: e.target.value })} placeholder="62031900" className="inp" />
+              </Field>
+              <Field label="CEST">
+                <input value={fiscal.cest} onChange={(e) => setFiscal({ ...fiscal, cest: e.target.value })} className="inp" />
+              </Field>
+              <Field label="Unidade">
+                <input value={fiscal.unit} onChange={(e) => setFiscal({ ...fiscal, unit: e.target.value })} className="inp" />
+              </Field>
+              <Field label="CFOP">
+                <select value={fiscal.cfop} onChange={(e) => setFiscal({ ...fiscal, cfop: e.target.value })} className="inp">
+                  {CFOP_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.value}</option>)}
+                </select>
+              </Field>
+            </div>
+            <Field label="Origem da mercadoria">
+              <select value={fiscal.origin} onChange={(e) => setFiscal({ ...fiscal, origin: e.target.value })} className="inp">
+                {ORIGIN_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </Field>
+            <Field label="CST / CSOSN">
+              <select value={fiscal.cst} onChange={(e) => setFiscal({ ...fiscal, cst: e.target.value })} className="inp">
+                {CST_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="ICMS %">
+                <input type="number" step="0.01" value={fiscal.icms_rate} onChange={(e) => setFiscal({ ...fiscal, icms_rate: e.target.value })} className="inp" />
+              </Field>
+              <Field label="IPI %">
+                <input type="number" step="0.01" value={fiscal.ipi_rate} onChange={(e) => setFiscal({ ...fiscal, ipi_rate: e.target.value })} className="inp" />
+              </Field>
+              <Field label="PIS %">
+                <input type="number" step="0.01" value={fiscal.pis_rate} onChange={(e) => setFiscal({ ...fiscal, pis_rate: e.target.value })} className="inp" />
+              </Field>
+              <Field label="COFINS %">
+                <input type="number" step="0.01" value={fiscal.cofins_rate} onChange={(e) => setFiscal({ ...fiscal, cofins_rate: e.target.value })} className="inp" />
+              </Field>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
