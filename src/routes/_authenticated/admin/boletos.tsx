@@ -94,8 +94,10 @@ function BillsPage() {
     qc.invalidateQueries({ queryKey: ["admin-bills"] });
   };
 
-  const update = async (id: string, patch: Record<string, unknown>, msg: string) => {
+  type BillPatch = Partial<Pick<Bill, "status" | "paid_at" | "paid_amount">>;
+  const update = async (id: string, patch: BillPatch, msg: string) => {
     const { error } = await supabase.from("bills").update(patch).eq("id", id);
+
     if (error) return toast.error(error.message);
     toast.success(msg);
     qc.invalidateQueries({ queryKey: ["admin-bills"] });
