@@ -4,8 +4,6 @@ import { useState } from "react";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { cx } from "@/lib/format";
-import apsLogo from "@/assets/aps-logo.jpg.asset.json";
-
 
 const NAV = [
   { label: "Kimonos", to: "/produtos", search: { categoria: "kimonos" } },
@@ -53,7 +51,7 @@ export function SiteHeader() {
 
         <Link to="/" className="flex items-center gap-2.5 shrink-0" aria-label="APS Kimonos Store — página inicial">
           <img
-            src={apsLogo.url}
+            src="/imagens/Logo.jpeg"
             alt="APS Kimonos Store"
             width={140}
             height={40}
@@ -65,8 +63,6 @@ export function SiteHeader() {
             Kimono<span className="text-brand">Store</span>
           </span>
         </Link>
-
-
 
         <nav className="hidden lg:flex items-center gap-1 ml-6">
           {NAV.map((n) => (
@@ -127,12 +123,11 @@ export function SiteHeader() {
           <div className="absolute top-0 left-0 h-full w-80 max-w-[85vw] bg-background shadow-2xl flex flex-col">
             <div className="flex items-center justify-between px-4 h-16 border-b border-border">
               <div className="flex items-center gap-2">
-                <img src={apsLogo.url} alt="APS Kimonos Store" width={120} height={34} className="h-9 w-auto object-contain" />
+                <img src="/imagens/Logo.jpeg" alt="APS Kimonos Store" width={120} height={34} className="h-9 w-auto object-contain" />
                 <span className="text-base font-extrabold uppercase tracking-tight leading-none">
                   Kimono<span className="text-brand">Store</span>
                 </span>
               </div>
-
 
               <button onClick={() => setOpen(false)} className="p-2" aria-label="Fechar">
                 <X className="h-5 w-5" />
