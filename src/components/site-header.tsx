@@ -51,7 +51,7 @@ export function SiteHeader() {
           <Menu className="h-6 w-6" />
         </button>
 
-        <Link to="/" className="flex items-center gap-2 shrink-0" aria-label="APS Kimonos Store — página inicial">
+        <Link to="/" className="flex items-center gap-2.5 shrink-0" aria-label="APS Kimonos Store — página inicial">
           <img
             src={apsLogo.url}
             alt="APS Kimonos Store"
@@ -59,7 +59,11 @@ export function SiteHeader() {
             height={40}
             className="h-9 w-auto md:h-10 object-contain"
           />
+          <span className="text-lg md:text-xl font-extrabold uppercase tracking-tight leading-none">
+            Kimono<span className="text-brand">Store</span>
+          </span>
         </Link>
+
 
 
         <nav className="hidden lg:flex items-center gap-1 ml-6">
