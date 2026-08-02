@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Save } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { companySchema, CRT_OPTIONS, UFS, firstFiscalIssue } from "@/lib/fiscal-helpers";
+import { companySchema, CRT_OPTIONS, UFS, firstFiscalIssue } from "@/lib/fiscal";
 
 export const Route = createFileRoute("/_authenticated/admin/empresa")({
   head: () => ({ meta: [{ title: "Dados da empresa — Admin" }, { name: "robots", content: "noindex" }] }),
