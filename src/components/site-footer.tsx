@@ -8,7 +8,7 @@ export function SiteFooter() {
     <footer className="mt-24 bg-primary text-primary-foreground">
       <div className="container-app py-16 grid gap-10 md:grid-cols-4">
         <div className="md:col-span-1">
-          <img src={apsLogo.url} alt="APS Kimonos Store" width={160} height={46} className="h-12 w-auto object-contain rounded-xl ring-1 ring-white/15 bg-white" />
+          <img src={apsLogo.url} alt="APS Kimonos Store" width={160} height={46} className="h-12 w-auto object-contain" />
 
           <p className="mt-4 text-sm text-primary-foreground/70 max-w-xs">
             Equipamento premium para praticantes de Jiu-Jitsu. Do iniciante ao competidor.
