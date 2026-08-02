@@ -57,7 +57,7 @@ export function SiteHeader() {
             alt="APS Kimonos Store"
             width={140}
             height={40}
-            className="h-9 w-auto md:h-10 object-contain"
+            className="h-10 w-auto md:h-11 object-cover rounded-xl ring-1 ring-border shadow-sm"
           />
           <span className="text-lg md:text-xl font-extrabold uppercase tracking-tight leading-none">
             Kimono<span className="text-brand">Store</span>
