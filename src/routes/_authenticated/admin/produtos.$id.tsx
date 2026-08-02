@@ -177,6 +177,9 @@ function ProductEditor() {
     const szParsed = productSizesSchema.safeParse(sizes.filter((s) => s.size_id).map((s) => ({ size_id: s.size_id, stock: Number(s.stock) })));
     if (!szParsed.success) return toast.error(firstIssue(szParsed.error));
 
+    if (fiscal.ncm && onlyDigits(fiscal.ncm).length !== 8) return toast.error("NCM deve ter 8 dígitos");
+    if (fiscal.cfop && onlyDigits(fiscal.cfop).length !== 4) return toast.error("CFOP deve ter 4 dígitos");
+
     setSaving(true);
     try {
       const d = parsed.data;
@@ -196,7 +199,18 @@ function ProductEditor() {
         color: d.color || null,
         featured: d.featured,
         active: d.active,
+        ncm: fiscal.ncm || null,
+        cest: fiscal.cest || null,
+        cfop: fiscal.cfop || null,
+        unit: fiscal.unit || "UN",
+        origin: fiscal.origin || null,
+        cst: fiscal.cst || null,
+        icms_rate: Number(fiscal.icms_rate || 0),
+        ipi_rate: Number(fiscal.ipi_rate || 0),
+        pis_rate: Number(fiscal.pis_rate || 0),
+        cofins_rate: Number(fiscal.cofins_rate || 0),
       };
+
 
 
       let productId = id;
