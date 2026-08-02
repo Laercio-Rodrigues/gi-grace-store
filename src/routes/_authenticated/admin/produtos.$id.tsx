@@ -128,8 +128,22 @@ function ProductEditor() {
         featured: p.featured,
         active: p.active,
       });
+      const pf = p as unknown as Record<string, unknown>;
+      setFiscal({
+        ncm: (pf.ncm as string) ?? "",
+        cest: (pf.cest as string) ?? "",
+        cfop: (pf.cfop as string) ?? "5102",
+        unit: (pf.unit as string) ?? "UN",
+        origin: (pf.origin as string) ?? "0",
+        cst: (pf.cst as string) ?? "102",
+        icms_rate: String(pf.icms_rate ?? 0),
+        ipi_rate: String(pf.ipi_rate ?? 0),
+        pis_rate: String(pf.pis_rate ?? 0),
+        cofins_rate: String(pf.cofins_rate ?? 0),
+      });
       setImages((p.images ?? []).sort((a: any, b: any) => a.position - b.position));
       setSizes((p.sizes ?? []).map((s: any) => ({ size_id: s.size_id, stock: s.stock })));
+
     }
   }, [product.data]);
 
