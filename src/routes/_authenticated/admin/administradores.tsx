@@ -71,8 +71,8 @@ function AdminsPage() {
     setBusy("new");
     const { error: err } = await supabase.rpc("admin_upsert_invite", {
       _email: email,
-      _name: form.name.trim() || null,
-      _note: form.note.trim() || null,
+      _name: form.name.trim(),
+      _note: form.note.trim(),
       _make_admin: form.is_admin,
     });
     setBusy(null);
@@ -87,8 +87,8 @@ function AdminsPage() {
     setBusy(m.id);
     const { error: err } = await supabase.rpc("admin_upsert_invite", {
       _email: m.email,
-      _name: m.name,
-      _note: m.note,
+      _name: m.name ?? "",
+      _note: m.note ?? "",
       _make_admin: !m.is_admin,
     });
     setBusy(null);
