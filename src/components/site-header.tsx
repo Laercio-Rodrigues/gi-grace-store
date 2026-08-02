@@ -120,9 +120,8 @@ export function SiteHeader() {
           <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} />
           <div className="absolute top-0 left-0 h-full w-80 max-w-[85vw] bg-background shadow-2xl flex flex-col">
             <div className="flex items-center justify-between px-4 h-16 border-b border-border">
-              <span className="text-display text-lg">
-                Kimono<span className="text-brand">Store</span>
-              </span>
+              <img src={apsLogo.url} alt="APS Kimonos Store" width={120} height={34} className="h-8 w-auto object-contain" />
+
               <button onClick={() => setOpen(false)} className="p-2" aria-label="Fechar">
                 <X className="h-5 w-5" />
               </button>
