@@ -20,7 +20,9 @@ const TABS = [
   { to: "/admin/produtos", label: "Produtos", icon: Package },
   { to: "/admin/pedidos", label: "Pedidos", icon: ShoppingBag },
   { to: "/admin/faturamento", label: "Faturamento", icon: Receipt },
+  { to: "/admin/bancos", label: "Bancos", icon: Landmark },
   { to: "/admin/boletos", label: "Boletos", icon: Barcode },
+
   { to: "/admin/categorias", label: "Categorias", icon: Tag },
   { to: "/admin/marcas", label: "Marcas", icon: Store },
   { to: "/admin/cupons", label: "Cupons", icon: Ticket },
