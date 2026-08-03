@@ -639,6 +639,63 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_accounts: {
+        Row: {
+          account_number: string | null
+          account_type: string
+          active: boolean
+          agency: string | null
+          bank_code: string | null
+          bank_name: string
+          created_at: string
+          holder_doc: string | null
+          holder_name: string
+          id: string
+          is_default: boolean
+          label: string
+          notes: string | null
+          pix_key: string | null
+          pix_key_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_number?: string | null
+          account_type?: string
+          active?: boolean
+          agency?: string | null
+          bank_code?: string | null
+          bank_name: string
+          created_at?: string
+          holder_doc?: string | null
+          holder_name: string
+          id?: string
+          is_default?: boolean
+          label: string
+          notes?: string | null
+          pix_key?: string | null
+          pix_key_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_number?: string | null
+          account_type?: string
+          active?: boolean
+          agency?: string | null
+          bank_code?: string | null
+          bank_name?: string
+          created_at?: string
+          holder_doc?: string | null
+          holder_name?: string
+          id?: string
+          is_default?: boolean
+          label?: string
+          notes?: string | null
+          pix_key?: string | null
+          pix_key_type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_images: {
         Row: {
           id: string
