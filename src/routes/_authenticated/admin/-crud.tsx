@@ -109,7 +109,7 @@ export function CrudTable({ table, title, queryKey, fields, orderBy, orderDesc }
               </tr>
             </thead>
             <tbody>
-              {(list.data ?? []).map((row) => (
+              {(list.data ?? []).map((row: Record<string, any>) => (
                 <tr key={row.id as string} className="border-t border-border">
                   {fields.map((f) => (
                     <td key={f.key} className={`p-3 ${f.mono ? "font-mono text-xs" : ""}`}>

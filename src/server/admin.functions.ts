@@ -12,9 +12,6 @@ const slug = z
   .max(150)
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug: apenas letras minúsculas, números e hífens");
 
-/** Cria uma server function de admin (middleware de autorização já aplicado). */
-const admin = () => createServerFn({ method: "POST" }).middleware([requireAdmin]);
-
 // ═════════════════════ CRUD genérico (banners, categorias, cupons, marcas) ═════════════════════
 
 type FieldKind = "text" | "number" | "boolean" | "datetime";
@@ -103,7 +100,7 @@ function coerceCrud(cfg: CrudConfig, table: string, payload: Record<string, unkn
   return out;
 }
 
-export const adminCrudListFn = admin()
+export const adminCrudListFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(
     z.object({ table: crudTable, orderBy: z.string().max(40).optional(), desc: z.boolean().optional() }),
   )
@@ -117,10 +114,12 @@ export const adminCrudListFn = admin()
     const rows = await (prisma as any)[cfg.model].findMany({
       ...(orderBy ? { orderBy: { [orderBy]: data.desc ? "desc" : "asc" } } : {}),
     });
-    return plain(rows) as Record<string, unknown>[];
+
+    return JSON.parse(JSON.stringify(plain(rows)));
+
   });
 
-export const adminCrudSaveFn = admin()
+export const adminCrudSaveFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(
     z.object({ table: crudTable, id: uuid.nullish(), payload: z.record(z.string(), z.unknown()) }),
   )
@@ -140,7 +139,7 @@ export const adminCrudSaveFn = admin()
     }
   });
 
-export const adminCrudDeleteFn = admin()
+export const adminCrudDeleteFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(z.object({ table: crudTable, id: uuid }))
   .handler(async ({ data }) => {
     const { prisma } = await import("./db.server");
@@ -156,7 +155,7 @@ export const adminCrudDeleteFn = admin()
 
 // ═════════════════════ Dashboard ═════════════════════
 
-export const adminStatsFn = admin().handler(async () => {
+export const adminStatsFn = createServerFn({ method: "POST" }).middleware([requireAdmin]).handler(async () => {
   const { prisma } = await import("./db.server");
   const { plain } = await import("./serialize.server");
   const [orders, products, userCount] = await Promise.all([
@@ -185,7 +184,7 @@ export const adminStatsFn = admin().handler(async () => {
 
 const orderStatus = z.enum(["pending", "paid", "shipped", "delivered", "cancelled"]);
 
-export const adminOrdersFn = admin().handler(async () => {
+export const adminOrdersFn = createServerFn({ method: "POST" }).middleware([requireAdmin]).handler(async () => {
   const { prisma } = await import("./db.server");
   const { plain } = await import("./serialize.server");
   const rows = await prisma.order.findMany({
@@ -195,7 +194,7 @@ export const adminOrdersFn = admin().handler(async () => {
   return plain(rows);
 });
 
-export const adminOrderFn = admin()
+export const adminOrderFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(z.object({ id: uuid }))
   .handler(async ({ data }) => {
     const { prisma } = await import("./db.server");
@@ -204,7 +203,7 @@ export const adminOrderFn = admin()
     return row ? plain(row) : null;
   });
 
-export const adminSetOrderStatusFn = admin()
+export const adminSetOrderStatusFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(z.object({ id: uuid, status: orderStatus }))
   .handler(async ({ data }) => {
     const { prisma } = await import("./db.server");
@@ -219,7 +218,7 @@ export const adminSetOrderStatusFn = admin()
 
 // ═════════════════════ Produtos ═════════════════════
 
-export const adminProductsFn = admin().handler(async () => {
+export const adminProductsFn = createServerFn({ method: "POST" }).middleware([requireAdmin]).handler(async () => {
   const { prisma } = await import("./db.server");
   const { plain } = await import("./serialize.server");
   const rows = await prisma.product.findMany({
@@ -242,7 +241,7 @@ export const adminProductsFn = admin().handler(async () => {
   return plain(rows);
 });
 
-export const adminSetProductFlagFn = admin()
+export const adminSetProductFlagFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(z.object({ id: uuid, field: z.enum(["active", "featured"]), value: z.boolean() }))
   .handler(async ({ data }) => {
     const { prisma } = await import("./db.server");
@@ -250,7 +249,7 @@ export const adminSetProductFlagFn = admin()
     return { ok: true as const };
   });
 
-export const adminDeleteProductFn = admin()
+export const adminDeleteProductFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(z.object({ id: uuid }))
   .handler(async ({ data }) => {
     const { prisma } = await import("./db.server");
@@ -263,7 +262,7 @@ export const adminDeleteProductFn = admin()
     }
   });
 
-export const adminProductLookupsFn = admin().handler(async () => {
+export const adminProductLookupsFn = createServerFn({ method: "POST" }).middleware([requireAdmin]).handler(async () => {
   const { prisma } = await import("./db.server");
   const { plain } = await import("./serialize.server");
   const [categories, brands, sizes] = await Promise.all([
@@ -275,7 +274,7 @@ export const adminProductLookupsFn = admin().handler(async () => {
 });
 
 /** Produto completo (editor e pré-preenchimento de nota fiscal). */
-export const adminProductFn = admin()
+export const adminProductFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(z.object({ id: uuid }))
   .handler(async ({ data }) => {
     const { prisma } = await import("./db.server");
@@ -318,7 +317,7 @@ const productPayload = z.object({
   cofins_rate: z.number().min(0).max(100),
 });
 
-export const adminSaveProductFn = admin()
+export const adminSaveProductFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(
     z.object({
       id: uuid.nullable(),
@@ -362,7 +361,7 @@ export const adminSaveProductFn = admin()
 
 // ═════════════════════ Empresa (emitente) ═════════════════════
 
-export const adminCompanyFn = admin().handler(async () => {
+export const adminCompanyFn = createServerFn({ method: "POST" }).middleware([requireAdmin]).handler(async () => {
   const { prisma } = await import("./db.server");
   const { plain } = await import("./serialize.server");
   const row = await prisma.companySettings.findFirst();
@@ -389,7 +388,7 @@ const companyPayload = z.object({
   nfe_series: z.string().trim().min(1).max(3),
 });
 
-export const adminSaveCompanyFn = admin()
+export const adminSaveCompanyFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(companyPayload)
   .handler(async ({ data }) => {
     const { prisma } = await import("./db.server");
@@ -411,7 +410,7 @@ export const adminSaveCompanyFn = admin()
 
 // ═════════════════════ Faturamento (recibos / NF-e) ═════════════════════
 
-export const adminInvoicesFn = admin().handler(async () => {
+export const adminInvoicesFn = createServerFn({ method: "POST" }).middleware([requireAdmin]).handler(async () => {
   const { prisma } = await import("./db.server");
   const { plain } = await import("./serialize.server");
   const rows = await prisma.invoice.findMany({
@@ -433,7 +432,7 @@ export const adminInvoicesFn = admin().handler(async () => {
   return plain(rows);
 });
 
-export const adminInvoiceFn = admin()
+export const adminInvoiceFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(z.object({ id: uuid }))
   .handler(async ({ data }) => {
     const { prisma } = await import("./db.server");
@@ -445,7 +444,7 @@ export const adminInvoiceFn = admin()
     return row ? plain(row) : null;
   });
 
-export const adminSetInvoiceStatusFn = admin()
+export const adminSetInvoiceStatusFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(z.object({ id: uuid, status: z.enum(["issued", "paid", "cancelled"]) }))
   .handler(async ({ data }) => {
     const { prisma } = await import("./db.server");
@@ -484,7 +483,7 @@ const invoiceItemPayload = z.object({
   cofins_value: num,
 });
 
-export const adminCreateInvoiceFn = admin()
+export const adminCreateInvoiceFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(
     z.object({
       order_id: uuid.nullish(),
@@ -547,7 +546,7 @@ export const adminCreateInvoiceFn = admin()
 
 // ═════════════════════ Boletos (contas a pagar) ═════════════════════
 
-export const adminBillsFn = admin().handler(async () => {
+export const adminBillsFn = createServerFn({ method: "POST" }).middleware([requireAdmin]).handler(async () => {
   const { prisma } = await import("./db.server");
   const { plain, ymd } = await import("./serialize.server");
   const rows = await prisma.bill.findMany({ orderBy: { due_date: "asc" } });
@@ -559,7 +558,7 @@ export const adminBillsFn = admin().handler(async () => {
   }));
 });
 
-export const adminCreateBillFn = admin()
+export const adminCreateBillFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(
     z.object({
       description: z.string().trim().min(2).max(150),
@@ -591,7 +590,7 @@ export const adminCreateBillFn = admin()
     return { ok: true as const };
   });
 
-export const adminUpdateBillFn = admin()
+export const adminUpdateBillFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(
     z.object({
       id: uuid,
@@ -618,7 +617,7 @@ export const adminUpdateBillFn = admin()
     }
   });
 
-export const adminDeleteBillFn = admin()
+export const adminDeleteBillFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(z.object({ id: uuid }))
   .handler(async ({ data }) => {
     const { prisma } = await import("./db.server");
@@ -628,7 +627,7 @@ export const adminDeleteBillFn = admin()
 
 // ═════════════════════ Contas bancárias de recebimento ═════════════════════
 
-export const adminAccountsFn = admin().handler(async () => {
+export const adminAccountsFn = createServerFn({ method: "POST" }).middleware([requireAdmin]).handler(async () => {
   const { prisma } = await import("./db.server");
   const { plain } = await import("./serialize.server");
   const rows = await prisma.paymentAccount.findMany({
@@ -637,7 +636,7 @@ export const adminAccountsFn = admin().handler(async () => {
   return plain(rows);
 });
 
-export const adminCreateAccountFn = admin()
+export const adminCreateAccountFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(
     z.object({
       label: z.string().trim().min(2).max(80),
@@ -670,7 +669,7 @@ export const adminCreateAccountFn = admin()
     return { ok: true as const };
   });
 
-export const adminMakeDefaultAccountFn = admin()
+export const adminMakeDefaultAccountFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(z.object({ id: uuid }))
   .handler(async ({ data }) => {
     const { prisma } = await import("./db.server");
@@ -686,7 +685,7 @@ export const adminMakeDefaultAccountFn = admin()
     }
   });
 
-export const adminToggleAccountFn = admin()
+export const adminToggleAccountFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(z.object({ id: uuid }))
   .handler(async ({ data }) => {
     const { prisma } = await import("./db.server");
@@ -699,7 +698,7 @@ export const adminToggleAccountFn = admin()
     return { ok: true as const };
   });
 
-export const adminDeleteAccountFn = admin()
+export const adminDeleteAccountFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(z.object({ id: uuid }))
   .handler(async ({ data }) => {
     const { prisma } = await import("./db.server");
@@ -712,7 +711,7 @@ export const adminDeleteAccountFn = admin()
 
 // ═════════════════════ Equipe / administradores ═════════════════════
 
-export const adminInvitesFn = admin().handler(async () => {
+export const adminInvitesFn = createServerFn({ method: "POST" }).middleware([requireAdmin]).handler(async () => {
   const { prisma } = await import("./db.server");
   const { plain } = await import("./serialize.server");
   const rows = await prisma.adminInvite.findMany({
@@ -722,7 +721,7 @@ export const adminInvitesFn = admin().handler(async () => {
   return plain(rows);
 });
 
-export const adminAuditFn = admin().handler(async () => {
+export const adminAuditFn = createServerFn({ method: "POST" }).middleware([requireAdmin]).handler(async () => {
   const { prisma } = await import("./db.server");
   const { plain } = await import("./serialize.server");
   const rows = await prisma.roleAudit.findMany({ orderBy: { created_at: "desc" }, take: 20 });
@@ -731,7 +730,7 @@ export const adminAuditFn = admin().handler(async () => {
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
-export const adminUpsertInviteFn = admin()
+export const adminUpsertInviteFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(
     z.object({
       email: z.string().max(254),
@@ -804,7 +803,7 @@ export const adminUpsertInviteFn = admin()
     }
   });
 
-export const adminDeleteInviteFn = admin()
+export const adminDeleteInviteFn = createServerFn({ method: "POST" }).middleware([requireAdmin])
   .validator(z.object({ id: uuid }))
   .handler(async ({ data }) => {
     const { prisma } = await import("./db.server");

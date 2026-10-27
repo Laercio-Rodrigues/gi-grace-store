@@ -1,5 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from '@tanstack/react-router'
+
+export const Route = createFileRoute('/_authenticated/admin/')({
+  component: Dashboard,
+})
+
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   Bar,
   BarChart,
@@ -20,10 +26,6 @@ import { adminStatsFn } from "@/server/admin.functions";
 import { brl } from "@/lib/format";
 import { resolveImage } from "@/lib/assets";
 
-export const Route = createFileRoute("/_authenticated/admin/")({
-  component: Dashboard,
-});
-
 const STATUS_COLORS: Record<string, string> = {
   pending: "#F59E0B",
   paid: "#3B82F6",
@@ -32,12 +34,42 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: "#EF4444",
 };
 
+/** Gráficos só no navegador, com altura fixa: evita travar no SSR e loops de redimensionamento. */
+function ChartBox({ h, children }: { h: number; children: ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return <div style={{ height: h }} />;
+  return (
+    <div style={{ width: "100%", height: h }}>
+      <ResponsiveContainer width="100%" height={h} minWidth={0} debounce={100}>
+        {children as React.ReactElement}
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
 function Dashboard() {
   const stats = useQuery({
     queryKey: ["admin-stats"],
     queryFn: () => adminStatsFn(),
   });
 
+  if (stats.isError) {
+    return (
+      <div className="py-16 text-center">
+        <p className="font-semibold text-destructive">Não foi possível carregar o dashboard.</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {stats.error instanceof Error ? stats.error.message : "Erro inesperado"}
+        </p>
+        <button
+          onClick={() => stats.refetch()}
+          className="mt-4 rounded-md border border-border px-4 py-2 text-sm font-semibold"
+        >
+          Tentar de novo
+        </button>
+      </div>
+    );
+  }
   if (stats.isLoading || !stats.data) {
     return <div className="py-16 text-center text-muted-foreground">Carregando dashboard...</div>;
   }
@@ -112,24 +144,24 @@ function Dashboard() {
             <TrendingUp className="h-4 w-4 text-brand" />
           </div>
           <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
+            <ChartBox h={288}>
               <LineChart data={days}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
                 <XAxis dataKey="day" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `R$${v}`} />
                 <Tooltip formatter={(v: number) => brl(v)} />
-                <Line type="monotone" dataKey="receita" stroke="#D90429" strokeWidth={2.5} dot={{ r: 3 }} />
+                <Line isAnimationActive={false} type="monotone" dataKey="receita" stroke="#D90429" strokeWidth={2.5} dot={{ r: 3 }} />
               </LineChart>
-            </ResponsiveContainer>
+            </ChartBox>
           </div>
         </div>
 
         <div className="rounded-lg border border-border bg-card p-5">
           <h3 className="mb-4 font-bold">Pedidos por status</h3>
           <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
+            <ChartBox h={288}>
               <PieChart>
-                <Pie data={statusData} dataKey="value" nameKey="status" outerRadius={90} label>
+                <Pie isAnimationActive={false} data={statusData} dataKey="value" nameKey="status" outerRadius={90} label>
                   {statusData.map((d) => (
                     <Cell key={d.status} fill={STATUS_COLORS[d.status] ?? "#888"} />
                   ))}
@@ -137,7 +169,7 @@ function Dashboard() {
                 <Tooltip />
                 <Legend />
               </PieChart>
-            </ResponsiveContainer>
+            </ChartBox>
           </div>
         </div>
       </div>
@@ -145,15 +177,15 @@ function Dashboard() {
       <div className="rounded-lg border border-border bg-card p-5">
         <h3 className="mb-4 font-bold">Pedidos por dia (volume)</h3>
         <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
+          <ChartBox h={256}>
             <BarChart data={days}>
               <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
               <XAxis dataKey="day" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
               <Tooltip />
-              <Bar dataKey="pedidos" fill="#111111" radius={[4, 4, 0, 0]} />
+              <Bar isAnimationActive={false} dataKey="pedidos" fill="#111111" radius={[4, 4, 0, 0]} />
             </BarChart>
-          </ResponsiveContainer>
+          </ChartBox>
         </div>
       </div>
 
