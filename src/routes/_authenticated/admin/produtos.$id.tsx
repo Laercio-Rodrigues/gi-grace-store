@@ -1,0 +1,456 @@
+import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, Trash2, Plus, FileText } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { adminProductFn, adminProductLookupsFn, adminSaveProductFn } from "@/server/admin.functions";
+import { resolveImage } from "@/lib/assets";
+import { productSchema, productImagesSchema, productSizesSchema, firstIssue } from "@/lib/admin-validation";
+import { CFOP_OPTIONS, CST_OPTIONS, ORIGIN_OPTIONS, onlyDigits } from "@/lib/fiscal";
+
+
+export const Route = createFileRoute("/_authenticated/admin/produtos/$id")({
+  component: ProductEditor,
+});
+
+const slugify = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+type Form = {
+  name: string;
+  slug: string;
+  description: string;
+  technical_description: string;
+  category_id: string;
+  brand_id: string;
+  price: string;
+  sale_price: string;
+  stock: string;
+  sku: string;
+  weight: string;
+  material: string;
+  color: string;
+  featured: boolean;
+  active: boolean;
+};
+
+const EMPTY: Form = {
+  name: "",
+  slug: "",
+  description: "",
+  technical_description: "",
+  category_id: "",
+  brand_id: "",
+  price: "",
+  sale_price: "",
+  stock: "0",
+  sku: "",
+  weight: "",
+  material: "",
+  color: "",
+  featured: false,
+  active: true,
+};
+
+const EMPTY_FISCAL = {
+  ncm: "",
+  cest: "",
+  cfop: "5102",
+  unit: "UN",
+  origin: "0",
+  cst: "102",
+  icms_rate: "0",
+  ipi_rate: "0",
+  pis_rate: "0",
+  cofins_rate: "0",
+};
+
+
+
+function ProductEditor() {
+  const { id } = useParams({ from: "/_authenticated/admin/produtos/$id" });
+  const isNew = id === "novo";
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [form, setForm] = useState<Form>(EMPTY);
+  const [images, setImages] = useState<{ id?: string; image_url: string; position: number }[]>([]);
+  const [sizes, setSizes] = useState<{ size_id: string; stock: number }[]>([]);
+  const [fiscal, setFiscal] = useState({ ...EMPTY_FISCAL });
+  const [saving, setSaving] = useState(false);
+
+
+  const lookups = useQuery({
+    queryKey: ["admin-lookups"],
+    queryFn: () => adminProductLookupsFn(),
+  });
+
+  const product = useQuery({
+    queryKey: ["admin-product", id],
+    enabled: !isNew,
+    queryFn: () => adminProductFn({ data: { id } }),
+  });
+
+  useEffect(() => {
+    if (product.data) {
+      const p = product.data;
+      setForm({
+        name: p.name,
+        slug: p.slug,
+        description: p.description ?? "",
+        technical_description: p.technical_description ?? "",
+        category_id: p.category_id ?? "",
+        brand_id: p.brand_id ?? "",
+        price: String(p.price),
+        sale_price: p.sale_price != null ? String(p.sale_price) : "",
+        stock: String(p.stock),
+        sku: p.sku ?? "",
+        weight: p.weight ?? "",
+        material: p.material ?? "",
+        color: p.color ?? "",
+        featured: p.featured,
+        active: p.active,
+      });
+      const pf = p as unknown as Record<string, unknown>;
+      setFiscal({
+        ncm: (pf.ncm as string) ?? "",
+        cest: (pf.cest as string) ?? "",
+        cfop: (pf.cfop as string) ?? "5102",
+        unit: (pf.unit as string) ?? "UN",
+        origin: (pf.origin as string) ?? "0",
+        cst: (pf.cst as string) ?? "102",
+        icms_rate: String(pf.icms_rate ?? 0),
+        ipi_rate: String(pf.ipi_rate ?? 0),
+        pis_rate: String(pf.pis_rate ?? 0),
+        cofins_rate: String(pf.cofins_rate ?? 0),
+      });
+      setImages((p.images ?? []).sort((a: any, b: any) => a.position - b.position));
+      setSizes((p.sizes ?? []).map((s: any) => ({ size_id: s.size_id, stock: s.stock })));
+
+    }
+  }, [product.data]);
+
+  const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
+
+  const save = async () => {
+    const candidate = {
+      name: form.name.trim(),
+      slug: (form.slug || slugify(form.name)).trim(),
+      description: form.description.trim(),
+      technical_description: form.technical_description.trim(),
+      category_id: form.category_id,
+      brand_id: form.brand_id,
+      price: Number(form.price),
+      sale_price: form.sale_price === "" ? null : Number(form.sale_price),
+      stock: Number(form.stock || 0),
+      sku: form.sku.trim(),
+      weight: form.weight.trim(),
+      material: form.material.trim(),
+      color: form.color.trim(),
+      featured: form.featured,
+      active: form.active,
+    };
+
+    const parsed = productSchema.safeParse(candidate);
+    if (!parsed.success) return toast.error(firstIssue(parsed.error));
+
+    const imgs = productImagesSchema.safeParse(images.map((im) => im.image_url).filter((u) => u.trim()));
+    if (!imgs.success) return toast.error(firstIssue(imgs.error));
+
+    const szParsed = productSizesSchema.safeParse(sizes.filter((s) => s.size_id).map((s) => ({ size_id: s.size_id, stock: Number(s.stock) })));
+    if (!szParsed.success) return toast.error(firstIssue(szParsed.error));
+
+    if (fiscal.ncm && onlyDigits(fiscal.ncm).length !== 8) return toast.error("NCM deve ter 8 dígitos");
+    if (fiscal.cfop && onlyDigits(fiscal.cfop).length !== 4) return toast.error("CFOP deve ter 4 dígitos");
+
+    setSaving(true);
+    try {
+      const d = parsed.data;
+      const payload = {
+        name: d.name,
+        slug: d.slug,
+        description: d.description || null,
+        technical_description: d.technical_description || null,
+        category_id: d.category_id || null,
+        brand_id: d.brand_id || null,
+        price: d.price,
+        sale_price: d.sale_price,
+        stock: d.stock,
+        sku: d.sku || null,
+        weight: d.weight || null,
+        material: d.material || null,
+        color: d.color || null,
+        featured: d.featured,
+        active: d.active,
+        ncm: fiscal.ncm || null,
+        cest: fiscal.cest || null,
+        cfop: fiscal.cfop || null,
+        unit: fiscal.unit || "UN",
+        origin: fiscal.origin || null,
+        cst: fiscal.cst || null,
+        icms_rate: Number(fiscal.icms_rate || 0),
+        ipi_rate: Number(fiscal.ipi_rate || 0),
+        pis_rate: Number(fiscal.pis_rate || 0),
+        cofins_rate: Number(fiscal.cofins_rate || 0),
+      };
+
+
+
+      const saved = await adminSaveProductFn({
+        data: {
+          id: isNew ? null : id,
+          product: payload,
+          images: images.map((im) => im.image_url.trim()).filter(Boolean),
+          sizes: sizes
+            .filter((s) => s.size_id)
+            .map((s) => ({ size_id: s.size_id, stock: Number(s.stock) })),
+        },
+      });
+      const productId = saved.id;
+
+      toast.success(isNew ? "Produto criado" : "Produto atualizado");
+      qc.invalidateQueries({ queryKey: ["admin-products-list"] });
+      qc.invalidateQueries({ queryKey: ["admin-product", productId] });
+      if (isNew) navigate({ to: "/admin/produtos" });
+    } catch (e: any) {
+      toast.error(e.message ?? "Erro ao salvar");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const cats = lookups.data?.categories ?? [];
+  const brs = lookups.data?.brands ?? [];
+  const szs = lookups.data?.sizes ?? [];
+
+  if (!isNew && product.isLoading) {
+    return <div className="py-16 text-center text-muted-foreground">Carregando...</div>;
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Link to="/admin/produtos" className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-4 w-4" /> Voltar
+        </Link>
+        <div className="flex gap-2">
+          {!isNew && (
+            <Link
+              to="/admin/faturamento/nova"
+              search={{ tipo: "nfe", produto: id }}
+              className="inline-flex items-center gap-2 rounded-md border border-input px-4 py-2 text-sm font-bold uppercase tracking-wider hover:bg-surface"
+            >
+              <FileText className="h-4 w-4" /> Gerar nota
+            </Link>
+          )}
+          <button
+            onClick={save}
+            disabled={saving}
+            className="rounded-md bg-primary px-6 py-2 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:bg-brand transition-colors disabled:opacity-60"
+          >
+            {saving ? "Salvando..." : isNew ? "Criar produto" : "Salvar alterações"}
+          </button>
+        </div>
+      </div>
+
+
+      <h2 className="text-2xl font-bold">{isNew ? "Novo produto" : form.name || "Editar produto"}</h2>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-5 rounded-lg border border-border bg-card p-5">
+          <Field label="Nome">
+            <input value={form.name} onChange={(e) => set("name", e.target.value)} onBlur={() => !form.slug && set("slug", slugify(form.name))} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+          </Field>
+          <Field label="Slug (URL)">
+            <input value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="ex: kimono-branco-a2" className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono" />
+          </Field>
+          <Field label="Descrição">
+            <textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={4} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+          </Field>
+          <Field label="Descrição técnica">
+            <textarea value={form.technical_description} onChange={(e) => set("technical_description", e.target.value)} rows={3} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+          </Field>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Categoria">
+              <select value={form.category_id} onChange={(e) => set("category_id", e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                <option value="">—</option>
+                {cats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </Field>
+            <Field label="Marca">
+              <select value={form.brand_id} onChange={(e) => set("brand_id", e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                <option value="">—</option>
+                {brs.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+              </select>
+            </Field>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Material"><input value={form.material} onChange={(e) => set("material", e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" /></Field>
+            <Field label="Cor"><input value={form.color} onChange={(e) => set("color", e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" /></Field>
+            <Field label="Peso"><input value={form.weight} onChange={(e) => set("weight", e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" /></Field>
+            <Field label="SKU"><input value={form.sku} onChange={(e) => set("sku", e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" /></Field>
+          </div>
+
+          {/* Images */}
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Imagens (URL)</label>
+              <button
+                onClick={() => setImages((im) => [...im, { image_url: "", position: im.length }])}
+                className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 text-xs font-semibold hover:bg-surface"
+              >
+                <Plus className="h-3 w-3" /> Adicionar
+              </button>
+            </div>
+            <div className="space-y-2">
+              {images.map((im, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <img src={resolveImage(im.image_url)} alt="" className="h-10 w-10 rounded bg-surface object-cover" />
+                  <input
+                    value={im.image_url}
+                    onChange={(e) => setImages((arr) => arr.map((x, i) => (i === idx ? { ...x, image_url: e.target.value } : x)))}
+                    placeholder="https://... ou asset:gi-white"
+                    className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm font-mono"
+                  />
+                  <button onClick={() => setImages((arr) => arr.filter((_, i) => i !== idx))} className="rounded p-2 text-destructive hover:bg-destructive/10">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+              {!images.length && <p className="text-xs text-muted-foreground">Nenhuma imagem. Aceita URL externa ou <code>asset:key</code>.</p>}
+            </div>
+          </div>
+
+          {/* Sizes / stock per size */}
+          <div>
+            <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">Tamanhos disponíveis</label>
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+              {szs.map((sz) => {
+                const current = sizes.find((s) => s.size_id === sz.id);
+                return (
+                  <div key={sz.id} className="flex items-center gap-2 rounded border border-border p-2">
+                    <label className="flex flex-1 items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={!!current}
+                        onChange={(e) =>
+                          setSizes((arr) =>
+                            e.target.checked
+                              ? [...arr, { size_id: sz.id, stock: 0 }]
+                              : arr.filter((s) => s.size_id !== sz.id),
+                          )
+                        }
+                      />
+                      <span className="font-semibold">{sz.name}</span>
+                    </label>
+                    {current && (
+                      <input
+                        type="number"
+                        min={0}
+                        value={current.stock}
+                        onChange={(e) =>
+                          setSizes((arr) => arr.map((s) => (s.size_id === sz.id ? { ...s, stock: Number(e.target.value) } : s)))
+                        }
+                        className="w-16 rounded border border-input bg-background px-2 py-1 text-right text-sm"
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-5">
+          <div className="rounded-lg border border-border bg-card p-5 space-y-4">
+            <h3 className="font-bold">Preço e estoque</h3>
+            <Field label="Preço (R$)">
+              <input type="number" step="0.01" value={form.price} onChange={(e) => set("price", e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+            </Field>
+            <Field label="Preço promocional (R$)">
+              <input type="number" step="0.01" value={form.sale_price} onChange={(e) => set("sale_price", e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+            </Field>
+            <Field label="Estoque total">
+              <input type="number" value={form.stock} onChange={(e) => set("stock", e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+            </Field>
+          </div>
+
+          <div className="rounded-lg border border-border bg-card p-5 space-y-3">
+            <h3 className="font-bold">Visibilidade</h3>
+            <label className="flex items-center justify-between text-sm">
+              <span>Produto ativo</span>
+              <input type="checkbox" checked={form.active} onChange={(e) => set("active", e.target.checked)} />
+            </label>
+            <label className="flex items-center justify-between text-sm">
+              <span>Destacar na home</span>
+              <input type="checkbox" checked={form.featured} onChange={(e) => set("featured", e.target.checked)} />
+            </label>
+          </div>
+
+          <div className="rounded-lg border border-border bg-card p-5 space-y-4">
+            <div>
+              <h3 className="font-bold">Dados fiscais</h3>
+              <p className="text-xs text-muted-foreground">Preenchidos automaticamente ao gerar a nota fiscal deste produto.</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="NCM">
+                <input value={fiscal.ncm} onChange={(e) => setFiscal({ ...fiscal, ncm: e.target.value })} placeholder="62031900" className="inp" />
+              </Field>
+              <Field label="CEST">
+                <input value={fiscal.cest} onChange={(e) => setFiscal({ ...fiscal, cest: e.target.value })} className="inp" />
+              </Field>
+              <Field label="Unidade">
+                <input value={fiscal.unit} onChange={(e) => setFiscal({ ...fiscal, unit: e.target.value })} className="inp" />
+              </Field>
+              <Field label="CFOP">
+                <select value={fiscal.cfop} onChange={(e) => setFiscal({ ...fiscal, cfop: e.target.value })} className="inp">
+                  {CFOP_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.value}</option>)}
+                </select>
+              </Field>
+            </div>
+            <Field label="Origem da mercadoria">
+              <select value={fiscal.origin} onChange={(e) => setFiscal({ ...fiscal, origin: e.target.value })} className="inp">
+                {ORIGIN_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </Field>
+            <Field label="CST / CSOSN">
+              <select value={fiscal.cst} onChange={(e) => setFiscal({ ...fiscal, cst: e.target.value })} className="inp">
+                {CST_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="ICMS %">
+                <input type="number" step="0.01" value={fiscal.icms_rate} onChange={(e) => setFiscal({ ...fiscal, icms_rate: e.target.value })} className="inp" />
+              </Field>
+              <Field label="IPI %">
+                <input type="number" step="0.01" value={fiscal.ipi_rate} onChange={(e) => setFiscal({ ...fiscal, ipi_rate: e.target.value })} className="inp" />
+              </Field>
+              <Field label="PIS %">
+                <input type="number" step="0.01" value={fiscal.pis_rate} onChange={(e) => setFiscal({ ...fiscal, pis_rate: e.target.value })} className="inp" />
+              </Field>
+              <Field label="COFINS %">
+                <input type="number" step="0.01" value={fiscal.cofins_rate} onChange={(e) => setFiscal({ ...fiscal, cofins_rate: e.target.value })} className="inp" />
+              </Field>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-muted-foreground">{label}</label>
+      {children}
+    </div>
+  );
+}

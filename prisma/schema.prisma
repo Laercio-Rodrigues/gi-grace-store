@@ -1,0 +1,485 @@
+// Schema do banco de dados (PostgreSQL) — Kimono Store Pro
+//
+// Os campos usam snake_case de propósito: os objetos retornados pelo Prisma
+// ficam com o mesmo formato que o front-end já consome (product.sale_price,
+// order.created_at, etc.), sem camada extra de conversão.
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────── Enums ─────────────────────────
+
+enum AppRole {
+  admin
+  customer
+
+  @@map("app_role")
+}
+
+enum OrderStatus {
+  pending
+  paid
+  shipped
+  delivered
+  cancelled
+
+  @@map("order_status")
+}
+
+enum InvoiceType {
+  receipt
+  nfe
+
+  @@map("invoice_type")
+}
+
+enum InvoiceStatus {
+  issued
+  paid
+  cancelled
+
+  @@map("invoice_status")
+}
+
+enum BillStatus {
+  pending
+  paid
+  cancelled
+
+  @@map("bill_status")
+}
+
+// ───────────────────────── Usuários / autenticação ─────────────────────────
+
+model User {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email         String   @unique
+  password_hash String?
+  google_id     String?  @unique
+  created_at    DateTime @default(now()) @db.Timestamptz(3)
+
+  profile   Profile?
+  roles     UserRole[]
+  addresses Address[]
+  orders    Order[]
+  favorites Favorite[]
+  reviews   Review[]
+
+  @@map("users")
+}
+
+model Profile {
+  id         String   @id @db.Uuid
+  name       String?
+  email      String?
+  phone      String?
+  avatar_url String?
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  user User @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model UserRole {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String   @db.Uuid
+  role       AppRole
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, role])
+  @@map("user_roles")
+}
+
+model RoleAudit {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  target_user_id String   @db.Uuid
+  actor_user_id  String?  @db.Uuid
+  action         String
+  role           AppRole
+  created_at     DateTime @default(now()) @db.Timestamptz(3)
+
+  @@map("role_audit")
+}
+
+model AdminInvite {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email      String   @unique // sempre armazenado em minúsculas
+  name       String?
+  note       String?
+  is_admin   Boolean  @default(false)
+  user_id    String?  @db.Uuid
+  invited_by String?  @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@map("admin_invites")
+}
+
+// ───────────────────────── Catálogo ─────────────────────────
+
+model Category {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String
+  slug       String   @unique
+  image_url  String?
+  active     Boolean  @default(true)
+  position   Int      @default(0)
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Brand {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String
+  slug       String   @unique
+  logo_url   String?
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+
+  products Product[]
+
+  @@map("brands")
+}
+
+model Product {
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                  String
+  slug                  String   @unique
+  description           String?
+  technical_description String?
+  category_id           String?  @db.Uuid
+  brand_id              String?  @db.Uuid
+  price                 Decimal  @db.Decimal(10, 2)
+  sale_price            Decimal? @db.Decimal(10, 2)
+  stock                 Int      @default(0)
+  sku                   String?  @unique
+  weight                String?
+  material              String?
+  color                 String?
+  featured              Boolean  @default(false)
+  active                Boolean  @default(true)
+  sales_count           Int      @default(0)
+  created_at            DateTime @default(now()) @db.Timestamptz(3)
+  updated_at            DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  // campos fiscais
+  ncm         String?
+  cest        String?
+  cfop        String?
+  origin      String?
+  cst         String?
+  unit        String  @default("UN")
+  icms_rate   Decimal @default(0) @db.Decimal(8, 4)
+  ipi_rate    Decimal @default(0) @db.Decimal(8, 4)
+  pis_rate    Decimal @default(0) @db.Decimal(8, 4)
+  cofins_rate Decimal @default(0) @db.Decimal(8, 4)
+
+  category      Category?      @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  brand         Brand?         @relation(fields: [brand_id], references: [id], onDelete: SetNull)
+  images        ProductImage[]
+  sizes         ProductSize[]
+  order_items   OrderItem[]
+  favorites     Favorite[]
+  reviews       Review[]
+  invoice_items InvoiceItem[]
+
+  @@index([category_id])
+  @@index([brand_id])
+  @@index([active])
+  @@map("products")
+}
+
+model ProductImage {
+  id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  product_id String @db.Uuid
+  image_url  String
+  position   Int    @default(0)
+
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+model Size {
+  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name     String @unique
+  position Int    @default(0)
+
+  product_sizes ProductSize[]
+
+  @@map("sizes")
+}
+
+model ProductSize {
+  id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  product_id String @db.Uuid
+  size_id    String @db.Uuid
+  stock      Int    @default(0)
+
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  size    Size    @relation(fields: [size_id], references: [id], onDelete: Cascade)
+
+  @@unique([product_id, size_id])
+  @@map("product_sizes")
+}
+
+model Banner {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title      String
+  subtitle   String?
+  image_url  String
+  link       String?
+  active     Boolean  @default(true)
+  position   Int      @default(0)
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+
+  @@map("banners")
+}
+
+model Coupon {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code             String    @unique
+  discount_percent Int
+  expires_at       DateTime? @db.Timestamptz(3)
+  active           Boolean   @default(true)
+  created_at       DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@map("coupons")
+}
+
+// ───────────────────────── Clientes / pedidos ─────────────────────────
+
+model Address {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String   @db.Uuid
+  street     String
+  number     String
+  complement String?
+  district   String?
+  city       String
+  state      String
+  zip_code   String
+  is_default Boolean  @default(false)
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("addresses")
+}
+
+model Order {
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id        String      @db.Uuid
+  status         OrderStatus @default(pending)
+  subtotal       Decimal     @db.Decimal(10, 2)
+  shipping       Decimal     @default(0) @db.Decimal(10, 2)
+  discount       Decimal     @default(0) @db.Decimal(10, 2)
+  total          Decimal     @db.Decimal(10, 2)
+  payment_method String?
+  address_json   Json?
+  created_at     DateTime    @default(now()) @db.Timestamptz(3)
+  updated_at     DateTime    @default(now()) @updatedAt @db.Timestamptz(3)
+
+  user     User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  items    OrderItem[]
+  invoices Invoice[]
+
+  @@index([user_id])
+  @@map("orders")
+}
+
+model OrderItem {
+  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id      String  @db.Uuid
+  product_id    String? @db.Uuid
+  product_name  String
+  product_image String?
+  size_name     String?
+  quantity      Int
+  price         Decimal @db.Decimal(10, 2)
+
+  order   Order    @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [product_id], references: [id], onDelete: SetNull)
+
+  @@index([order_id])
+  @@map("order_items")
+}
+
+model Favorite {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String   @db.Uuid
+  product_id String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, product_id])
+  @@map("favorites")
+}
+
+model Review {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String   @db.Uuid
+  product_id String   @db.Uuid
+  rating     Int
+  comment    String?
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, product_id])
+  @@map("reviews")
+}
+
+// ───────────────────────── Financeiro / fiscal ─────────────────────────
+
+model CompanySettings {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  singleton  Boolean  @unique @default(true)
+  legal_name String   @default("")
+  trade_name String   @default("")
+  cnpj       String   @default("")
+  ie         String   @default("")
+  im         String?
+  crt        String   @default("1")
+  street     String   @default("")
+  number     String   @default("")
+  complement String?
+  district   String   @default("")
+  city       String   @default("")
+  city_code  String?
+  state      String   @default("")
+  zip_code   String   @default("")
+  phone      String?
+  email      String?
+  logo_url   String?
+  nfe_series String   @default("1")
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@map("company_settings")
+}
+
+model Invoice {
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id       String?       @db.Uuid
+  type           InvoiceType
+  number         Int
+  series         String        @default("1")
+  status         InvoiceStatus @default(issued)
+  customer_name  String
+  customer_doc   String?
+  customer_email String?
+  products_total Decimal       @default(0) @db.Decimal(14, 2)
+  shipping       Decimal       @default(0) @db.Decimal(14, 2)
+  discount       Decimal       @default(0) @db.Decimal(14, 2)
+  other_expenses Decimal       @default(0) @db.Decimal(14, 2)
+  tax_total      Decimal       @default(0) @db.Decimal(14, 2)
+  total          Decimal       @default(0) @db.Decimal(14, 2)
+  payment_method String?
+  notes          String?
+  payload        Json          @default("{}")
+  issued_at      DateTime      @default(now()) @db.Timestamptz(3)
+  created_by     String?       @db.Uuid
+  created_at     DateTime      @default(now()) @db.Timestamptz(3)
+  updated_at     DateTime      @default(now()) @updatedAt @db.Timestamptz(3)
+
+  order Order?        @relation(fields: [order_id], references: [id], onDelete: SetNull)
+  items InvoiceItem[]
+
+  @@unique([type, series, number])
+  @@index([issued_at(sort: Desc)])
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  invoice_id   String   @db.Uuid
+  position     Int      @default(0)
+  product_id   String?  @db.Uuid
+  code         String?
+  description  String
+  ncm          String?
+  cest         String?
+  cfop         String?
+  unit         String   @default("UN")
+  quantity     Decimal  @default(1) @db.Decimal(14, 4)
+  unit_price   Decimal  @default(0) @db.Decimal(14, 4)
+  discount     Decimal  @default(0) @db.Decimal(14, 2)
+  total        Decimal  @default(0) @db.Decimal(14, 2)
+  origin       String?
+  cst          String?
+  icms_base    Decimal  @default(0) @db.Decimal(14, 2)
+  icms_rate    Decimal  @default(0) @db.Decimal(8, 4)
+  icms_value   Decimal  @default(0) @db.Decimal(14, 2)
+  ipi_rate     Decimal  @default(0) @db.Decimal(8, 4)
+  ipi_value    Decimal  @default(0) @db.Decimal(14, 2)
+  pis_rate     Decimal  @default(0) @db.Decimal(8, 4)
+  pis_value    Decimal  @default(0) @db.Decimal(14, 2)
+  cofins_rate  Decimal  @default(0) @db.Decimal(8, 4)
+  cofins_value Decimal  @default(0) @db.Decimal(14, 2)
+  created_at   DateTime @default(now()) @db.Timestamptz(3)
+
+  invoice Invoice  @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [product_id], references: [id], onDelete: SetNull)
+
+  @@index([invoice_id])
+  @@map("invoice_items")
+}
+
+model Bill {
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  description    String
+  supplier       String     @default("")
+  category       String?
+  amount         Decimal    @db.Decimal(14, 2)
+  due_date       DateTime   @db.Date
+  barcode        String?
+  attachment_url String?
+  notes          String?
+  status         BillStatus @default(pending)
+  paid_at        DateTime?  @db.Date
+  paid_amount    Decimal?   @db.Decimal(14, 2)
+  created_by     String?    @db.Uuid
+  created_at     DateTime   @default(now()) @db.Timestamptz(3)
+  updated_at     DateTime   @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@index([due_date])
+  @@map("bills")
+}
+
+model PaymentAccount {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  label          String
+  bank_name      String
+  bank_code      String?
+  agency         String?
+  account_number String?
+  account_type   String   @default("corrente")
+  holder_name    String
+  holder_doc     String?
+  pix_key_type   String?
+  pix_key        String?
+  notes          String?
+  active         Boolean  @default(true)
+  is_default     Boolean  @default(false)
+  created_at     DateTime @default(now()) @db.Timestamptz(3)
+  updated_at     DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@map("payment_accounts")
+}
