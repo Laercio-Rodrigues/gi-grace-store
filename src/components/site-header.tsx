@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "@/lib/cart-context";
@@ -20,12 +20,14 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
 
   const onSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const value = q.trim();
     if (!value) return;
-    window.location.href = `/produtos?busca=${encodeURIComponent(value)}`;
+    setOpen(false);
+    navigate({ to: "/produtos", search: { busca: value } });
   };
 
   return (
@@ -40,7 +42,7 @@ export function SiteHeader() {
         </div>
       </div>
 
-      <div className="container-app flex h-16 items-center gap-4">
+      <div className="container-app flex h-[72px] md:h-20 items-center gap-4">
         <button
           onClick={() => setOpen(true)}
           className="lg:hidden -ml-2 p-2"
@@ -49,19 +51,17 @@ export function SiteHeader() {
           <Menu className="h-6 w-6" />
         </button>
 
-        <Link to="/" className="flex items-center gap-2.5 shrink-0" aria-label="APS Kimonos Store — página inicial">
+        <Link to="/" className="flex items-center shrink-0" aria-label="APS Kimonos Store — página inicial">
+          {/* Logo já recortado (506x274): altura fixa para ficar sempre legível e padronizado */}
           <img
-            src="/images/Logo.jpeg"
+            src="/images/logo-aps.png"
             alt="APS Kimonos Store"
-            width={140}
-            height={40}
+            width={506}
+            height={274}
             loading="eager"
             decoding="async"
-            className="h-10 w-auto md:h-11 object-contain rounded-full"
+            className="h-14 md:h-16 w-auto rounded-lg"
           />
-          <span className="text-lg md:text-xl font-extrabold uppercase tracking-tight leading-none">
-            Kimono<span className="text-brand">Store</span>
-          </span>
         </Link>
 
         <nav className="hidden lg:flex items-center gap-1 ml-6">
@@ -121,13 +121,14 @@ export function SiteHeader() {
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} />
           <div className="absolute top-0 left-0 h-full w-80 max-w-[85vw] bg-background shadow-2xl flex flex-col">
-            <div className="flex items-center justify-between px-4 h-16 border-b border-border">
-              <div className="flex items-center gap-2">
-                <img src="/images/Logo.jpeg" alt="APS Kimonos Store" width={120} height={34} className="h-9 w-auto object-contain rounded-full" />
-                <span className="text-base font-extrabold uppercase tracking-tight leading-none">
-                  Kimono<span className="text-brand">Store</span>
-                </span>
-              </div>
+            <div className="flex items-center justify-between px-4 h-[72px] border-b border-border">
+              <img
+                src="/images/logo-aps.png"
+                alt="APS Kimonos Store"
+                width={506}
+                height={274}
+                className="h-14 w-auto rounded-lg"
+              />
 
               <button onClick={() => setOpen(false)} className="p-2" aria-label="Fechar">
                 <X className="h-5 w-5" />

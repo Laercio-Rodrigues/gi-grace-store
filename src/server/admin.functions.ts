@@ -217,19 +217,58 @@ export const adminSetOrderStatusFn = createServerFn({ method: "POST" }).middlewa
     const { prisma } = await import("./db.server");
     const { friendlyError } = await import("./serialize.server");
     try {
-      const current = await prisma.order.findUnique({
-        where: { id: data.id },
-        select: { payment_status: true, paid_at: true },
-      });
-      await prisma.order.update({
-        where: { id: data.id },
-        data: {
-          status: data.status,
-          // Marcar como pago manualmente (ex.: dinheiro na loja) também aprova o pagamento.
-          ...(data.status === "paid" && current && current.payment_status !== "approved"
-            ? { payment_status: "approved" as const, paid_at: current.paid_at ?? new Date() }
-            : {}),
-        },
+      await prisma.$transaction(async (tx) => {
+        const current = await tx.order.findUnique({
+          where: { id: data.id },
+          select: { status: true, payment_status: true, paid_at: true, items: true },
+        });
+        if (!current) throw new Error("Registro não encontrado.");
+
+        // Cancelar devolve os itens ao estoque (uma única vez).
+        if (data.status === "cancelled" && current.status !== "cancelled") {
+          for (const it of current.items) {
+            if (!it.product_id) continue;
+            if (it.size_name) {
+              await tx.productSize.updateMany({
+                where: { product_id: it.product_id, size: { name: it.size_name } },
+                data: { stock: { increment: it.quantity } },
+              });
+            }
+            await tx.product.updateMany({
+              where: { id: it.product_id },
+              data: { stock: { increment: it.quantity }, sales_count: { decrement: it.quantity } },
+            });
+          }
+        }
+        // Reabrir um pedido cancelado volta a baixar o estoque.
+        if (current.status === "cancelled" && data.status !== "cancelled") {
+          for (const it of current.items) {
+            if (!it.product_id) continue;
+            if (it.size_name) {
+              const ok = await tx.productSize.updateMany({
+                where: { product_id: it.product_id, size: { name: it.size_name }, stock: { gte: it.quantity } },
+                data: { stock: { decrement: it.quantity } },
+              });
+              if (ok.count === 0) throw new Error(`Estoque insuficiente para reabrir o pedido (${it.product_name})`);
+            }
+            const ok = await tx.product.updateMany({
+              where: { id: it.product_id, stock: { gte: it.quantity } },
+              data: { stock: { decrement: it.quantity }, sales_count: { increment: it.quantity } },
+            });
+            if (ok.count === 0) throw new Error(`Estoque insuficiente para reabrir o pedido (${it.product_name})`);
+          }
+        }
+
+        await tx.order.update({
+          where: { id: data.id },
+          data: {
+            status: data.status,
+            // Marcar como pago manualmente (ex.: dinheiro na loja) também aprova o pagamento.
+            ...(data.status === "paid" && current.payment_status !== "approved"
+              ? { payment_status: "approved" as const, paid_at: current.paid_at ?? new Date() }
+              : {}),
+          },
+        });
       });
       return { ok: true as const };
     } catch (e) {
@@ -352,6 +391,9 @@ export const adminSaveProductFn = createServerFn({ method: "POST" }).middleware(
   .handler(async ({ data }) => {
     const { prisma } = await import("./db.server");
     const { friendlyError } = await import("./serialize.server");
+    if (data.product.sale_price != null && data.product.sale_price >= data.product.price) {
+      throw new Error("O preço promocional deve ser menor que o preço normal.");
+    }
     try {
       const id = await prisma.$transaction(async (tx) => {
         const saved = data.id

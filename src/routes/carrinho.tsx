@@ -140,7 +140,7 @@ function CartPage() {
         </div>
 
         {/* summary */}
-        <aside className="lg:sticky lg:top-24 h-fit p-6 bg-card border border-border rounded-lg space-y-4">
+        <aside className="lg:sticky lg:top-32 h-fit p-6 bg-card border border-border rounded-lg space-y-4">
           <h2 className="text-lg font-bold">Resumo do pedido</h2>
 
           <div>
