@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const { user, refresh } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
   const { redirect, erro } = Route.useSearch();
   const config = useQuery({ queryKey: ["auth-config"], queryFn: () => getAuthConfigFn() });
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -39,8 +39,14 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) navigate({ to: (redirect as "/") ?? "/" });
-  }, [user, redirect, navigate]);
+    if (!user) return;
+    // Só aceita caminhos internos (evita open redirect via ?redirect=https://...).
+    const safe =
+      redirect && redirect.startsWith("/") && !redirect.startsWith("//") && !redirect.startsWith("/\\")
+        ? redirect
+        : "/";
+    router.history.push(safe);
+  }, [user, redirect, router]);
 
   useEffect(() => {
     if (erro) toast.error(erro);

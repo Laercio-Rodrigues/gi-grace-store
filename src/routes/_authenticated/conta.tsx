@@ -79,8 +79,11 @@ function Conta() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const savedProfile = profile.data;
-  if (savedProfile && name === "" && savedProfile.name) setName(savedProfile.name);
-  if (savedProfile && phone === "" && savedProfile.phone) setPhone(savedProfile.phone);
+  useEffect(() => {
+    if (!savedProfile) return;
+    setName(savedProfile.name ?? "");
+    setPhone(savedProfile.phone ?? "");
+  }, [savedProfile]);
 
   const saveProfile = async () => {
     if (!user) return;

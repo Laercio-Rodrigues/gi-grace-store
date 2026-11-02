@@ -87,6 +87,7 @@ export const fetchProductBySlugFn = createServerFn({ method: "POST" })
         sizes: {
           select: { stock: true, size: { select: { id: true, name: true, position: true } } },
         },
+        reviews: { select: { rating: true } },
       },
     });
     return row ? plain(row) : null;
@@ -288,6 +289,11 @@ export const createOrderFn = createServerFn({ method: "POST" })
           if (!product) throw new Error("Produto indisponível");
 
           const unit = product.sale_price ?? product.price;
+
+          if (!sizeName) {
+            const hasSizes = await tx.productSize.count({ where: { product_id: product.id } });
+            if (hasSizes > 0) throw new Error(`Selecione um tamanho para ${product.name}`);
+          }
 
           if (sizeName) {
             const ps = await tx.productSize.findFirst({
