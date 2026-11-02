@@ -3,7 +3,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { run } from "@/lib/api";
-import { createOrderFn } from "@/server/store.functions";
+import { useQuery } from "@tanstack/react-query";
+import { createOrderFn, getPaymentConfigFn } from "@/server/store.functions";
 import { useAuth } from "@/lib/auth-context";
 import { useCart } from "@/lib/cart-context";
 import { resolveImage } from "@/lib/assets";
@@ -46,7 +47,13 @@ function Checkout() {
     state: "",
     zip_code: "",
   });
-  const [payment, setPayment] = useState<"pix" | "credit" | "boleto">("pix");
+  const [payment, setPayment] = useState<"online" | "cash">("online");
+  const config = useQuery({ queryKey: ["payment-config"], queryFn: () => getPaymentConfigFn() });
+  const online = config.data?.online ?? false;
+  const cash = config.data?.cash ?? false;
+  const maxInstallments = config.data?.max_installments ?? 12;
+  // se só houver uma forma disponível, ela é selecionada automaticamente
+  const method: "online" | "cash" = payment === "cash" && cash ? "cash" : online ? "online" : cash ? "cash" : "online";
 
   const discount = (subtotal * couponPercent) / 100;
   const shipping = subtotal > 499 || subtotal === 0 ? 0 : 39.9;
@@ -61,8 +68,12 @@ function Checkout() {
       return toast.error(parsed.error.issues[0].message);
     }
 
+    if (!online && !cash) {
+      return toast.error("Pagamento indisponível no momento. Tente novamente mais tarde.");
+    }
+
     setPlacing(true);
-    const { error } = await run(
+    const { data: created, error } = await run(
       createOrderFn({
         data: {
           items: items.map((i) => ({
@@ -71,19 +82,24 @@ function Checkout() {
             quantity: i.quantity,
           })),
           address: parsed.data,
-          payment_method: payment,
+          payment_method: method,
           coupon: coupon ?? null,
         },
       }),
     );
     setPlacing(false);
 
-    if (error) {
-      return toast.error(error.message || "Falha ao criar pedido");
+    if (error || !created) {
+      return toast.error(error?.message || "Falha ao criar pedido");
     }
 
     clear();
-    toast.success("Pedido realizado com sucesso!");
+    if (created.payment_url) {
+      // segue para o pagamento seguro no Mercado Pago (PIX ou cartão)
+      window.location.href = created.payment_url;
+      return;
+    }
+    toast.success("Pedido realizado! Pague na loja ao retirar.");
     navigate({ to: "/conta" });
   };
 
@@ -120,26 +136,36 @@ function Checkout() {
 
           <section className="bg-card border border-border rounded-lg p-6">
             <h2 className="text-lg font-bold mb-4">Pagamento</h2>
-            <div className="grid grid-cols-3 gap-2">
-              {(["pix", "credit", "boleto"] as const).map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setPayment(m)}
-                  className={`p-4 border-2 rounded-md text-sm font-bold uppercase tracking-wider transition-colors ${
-                    payment === m ? "border-primary bg-primary text-primary-foreground" : "border-border"
-                  }`}
-                >
-                  {m === "pix" ? "PIX" : m === "credit" ? "Cartão" : "Boleto"}
-                </button>
-              ))}
-            </div>
+            {config.isLoading ? (
+              <p className="text-sm text-muted-foreground">Carregando formas de pagamento...</p>
+            ) : !online && !cash ? (
+              <p className="text-sm text-destructive">
+                Pagamento indisponível no momento. Tente novamente mais tarde.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {online && (
+                  <PayOption
+                    active={method === "online"}
+                    onClick={() => setPayment("online")}
+                    title="PIX ou cartão"
+                    sub="Pagamento seguro pelo Mercado Pago"
+                  />
+                )}
+                {cash && (
+                  <PayOption
+                    active={method === "cash"}
+                    onClick={() => setPayment("cash")}
+                    title="Dinheiro na loja"
+                    sub="Pague ao retirar o pedido"
+                  />
+                )}
+              </div>
+            )}
             <p className="text-xs text-muted-foreground mt-4">
-              {payment === "pix"
-                ? "Aprovação instantânea. Enviaremos o QR code após confirmar o pedido."
-                : payment === "credit"
-                ? "Parcelamos em até 10x sem juros."
-                : "O boleto vence em 3 dias úteis."}
+              {method === "online"
+                ? `Você escolhe PIX ou cartão na próxima tela. Cartão de crédito em até ${maxInstallments}x; as condições aparecem antes de pagar.`
+                : "O pedido fica reservado e é pago diretamente na loja, na retirada."}
             </p>
           </section>
         </div>
@@ -186,10 +212,10 @@ function Checkout() {
             <span className="text-2xl font-bold">{brl(total)}</span>
           </div>
           <button
-            disabled={placing}
+            disabled={placing || (!online && !cash)}
             className="w-full bg-brand text-brand-foreground py-4 rounded-md font-bold uppercase tracking-widest text-sm hover:opacity-90 disabled:opacity-50"
           >
-            {placing ? "Processando..." : "Confirmar pedido"}
+            {placing ? "Processando..." : method === "online" ? "Ir para o pagamento" : "Confirmar pedido"}
           </button>
         </aside>
       </form>
@@ -220,5 +246,30 @@ function Input({
         className="mt-1.5 w-full bg-surface border border-border rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-primary"
       />
     </label>
+  );
+}
+
+function PayOption({
+  active,
+  onClick,
+  title,
+  sub,
+}: {
+  active: boolean;
+  onClick: () => void;
+  title: string;
+  sub: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`p-4 border-2 rounded-md text-left transition-colors ${
+        active ? "border-primary bg-primary text-primary-foreground" : "border-border"
+      }`}
+    >
+      <div className="text-sm font-bold uppercase tracking-wider">{title}</div>
+      <div className={`text-xs mt-1 ${active ? "opacity-80" : "text-muted-foreground"}`}>{sub}</div>
+    </button>
   );
 }

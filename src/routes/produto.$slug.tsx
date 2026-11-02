@@ -345,7 +345,7 @@ function ProductPage() {
               <ShieldCheck className="h-5 w-5 text-brand mt-0.5" />
               <div>
                 <div className="text-sm font-semibold">Compra 100% segura</div>
-                <div className="text-xs text-muted-foreground">Pix, boleto e cartão em até 10x</div>
+                <div className="text-xs text-muted-foreground">Pix e cartão parcelado</div>
               </div>
             </div>
           </div>

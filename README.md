@@ -938,3 +938,16 @@ Usuários: as senhas do Supabase são bcrypt e funcionam aqui. Com os dados já 
 INSERT INTO users (id, email, password_hash, created_at)
 SELECT id, lower(email), encrypted_password, created_at FROM auth.users;
 ```
+
+
+## Pagamentos (Mercado Pago – Checkout Pro)
+
+O checkout cria o pedido, gera a cobrança no Mercado Pago e leva o cliente à página segura de pagamento (PIX ou cartão, com parcelamento). O pedido é marcado como **pago** automaticamente quando o Mercado Pago avisa o servidor (webhook), e o valor é sempre conferido na API do Mercado Pago antes de aprovar.
+
+1. Crie uma aplicação em *Suas integrações* no Mercado Pago e copie o **Access Token** (`MP_ACCESS_TOKEN`).
+2. Em *Webhooks*, cadastre `https://SEU-DOMINIO/api/mercadopago/webhook` com o evento **Pagamentos** e copie a chave secreta para `MP_WEBHOOK_SECRET`.
+3. Teste com credenciais de teste e usuários de teste do Mercado Pago antes de usar as de produção.
+4. Dinheiro na loja: defina `ALLOW_CASH_PICKUP=true`; depois marque o pedido como "Pago" em Admin > Pedidos.
+5. Taxas, prazos de recebimento, juros do parcelamento e a conta bancária de saque (ex.: Nubank) são configurados no painel do Mercado Pago.
+
+Pedidos não pagos continuam reservando estoque; cancele-os pelo admin se forem abandonados.

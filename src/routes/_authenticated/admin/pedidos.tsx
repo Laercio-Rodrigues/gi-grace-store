@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { run } from "@/lib/api";
 import { adminOrdersFn, adminSetOrderStatusFn } from "@/server/admin.functions";
 import { brl } from "@/lib/format";
+import { PAYMENT_STATUS_LABEL, PAYMENT_STATUS_STYLE, paymentMethodLabel } from "@/lib/payment";
 
 type OrderStatusName = "pending" | "paid" | "shipped" | "delivered" | "cancelled";
 
@@ -80,7 +81,16 @@ function OrdersList() {
                 <tr key={o.id} className="border-t border-border">
                   <td className="p-3 font-mono text-xs">#{o.id.slice(0, 8)}</td>
                   <td className="p-3">{new Date(o.created_at).toLocaleString("pt-BR")}</td>
-                  <td className="p-3 text-muted-foreground">{o.payment_method ?? "—"}</td>
+                  <td className="p-3">
+                    <div className="text-muted-foreground">{paymentMethodLabel(o.payment_method)}</div>
+                    <span
+                      className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                        PAYMENT_STATUS_STYLE[o.payment_status] ?? "bg-muted"
+                      }`}
+                    >
+                      {PAYMENT_STATUS_LABEL[o.payment_status] ?? o.payment_status}
+                    </span>
+                  </td>
                   <td className="text-right p-3 font-bold">{brl(Number(o.total))}</td>
                   <td className="p-3">
                     <select

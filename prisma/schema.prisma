@@ -33,6 +33,16 @@ enum OrderStatus {
   @@map("order_status")
 }
 
+enum PaymentStatus {
+  pending
+  approved
+  rejected
+  cancelled
+  refunded
+
+  @@map("payment_status")
+}
+
 enum InvoiceType {
   receipt
   nfe
@@ -290,6 +300,14 @@ model Order {
   total          Decimal     @db.Decimal(10, 2)
   payment_method String?
   address_json   Json?
+
+  // pagamento (Mercado Pago)
+  payment_status   PaymentStatus @default(pending)
+  payment_url      String?
+  mp_preference_id String?
+  mp_payment_id    String?       @unique
+  paid_at          DateTime?     @db.Timestamptz(3)
+
   created_at     DateTime    @default(now()) @db.Timestamptz(3)
   updated_at     DateTime    @default(now()) @updatedAt @db.Timestamptz(3)
 

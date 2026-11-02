@@ -6,6 +6,7 @@ import { run } from "@/lib/api";
 import { adminOrderFn, adminSetOrderStatusFn } from "@/server/admin.functions";
 import { brl } from "@/lib/format";
 import { resolveImage } from "@/lib/assets";
+import { PAYMENT_STATUS_LABEL, PAYMENT_STATUS_STYLE, paymentMethodLabel } from "@/lib/payment";
 
 export const Route = createFileRoute("/_authenticated/admin/pedidos/$id")({
   component: OrderDetail,
@@ -114,7 +115,20 @@ function OrderDetail() {
             <div className="mt-3 border-t border-border pt-3">
               <Row label="Total" value={brl(Number(o.total))} bold />
             </div>
-            <div className="mt-3 text-xs text-muted-foreground">Pagamento: {o.payment_method ?? "—"}</div>
+            <div className="mt-3 space-y-1 text-xs text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <span>Pagamento: {paymentMethodLabel(o.payment_method)}</span>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                    PAYMENT_STATUS_STYLE[o.payment_status] ?? "bg-muted"
+                  }`}
+                >
+                  {PAYMENT_STATUS_LABEL[o.payment_status] ?? o.payment_status}
+                </span>
+              </div>
+              {o.paid_at && <div>Pago em {new Date(o.paid_at).toLocaleString("pt-BR")}</div>}
+              {o.mp_payment_id && <div>ID no Mercado Pago: {o.mp_payment_id}</div>}
+            </div>
           </div>
 
           <div className="rounded-lg border border-border bg-card p-5">

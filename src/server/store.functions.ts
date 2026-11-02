@@ -197,6 +197,9 @@ export const listMyOrdersFn = createServerFn({ method: "POST" })
         status: true,
         total: true,
         created_at: true,
+        payment_status: true,
+        payment_method: true,
+        payment_url: true,
         items: {
           select: {
             product_name: true,
@@ -239,7 +242,7 @@ export const createOrderFn = createServerFn({ method: "POST" })
         .min(1, "Carrinho vazio")
         .max(50, "Muitos itens no pedido"),
       address: addressSchema,
-      payment_method: z.enum(["pix", "credit", "boleto"], {
+      payment_method: z.enum(["online", "cash"], {
         errorMap: () => ({ message: "Forma de pagamento inválida" }),
       }),
       coupon: z.string().trim().max(60).nullable().optional(),
@@ -249,10 +252,19 @@ export const createOrderFn = createServerFn({ method: "POST" })
     const { prisma } = await import("./db.server");
     const { friendlyError } = await import("./serialize.server");
     const { Prisma: PrismaRuntime } = await import("@prisma/client");
+    const mp = await import("./mercadopago.server");
     const Decimal = PrismaRuntime.Decimal;
 
+    if (data.payment_method === "online" && !mp.mpEnabled()) {
+      throw new Error("Pagamento online indisponível no momento.");
+    }
+    if (data.payment_method === "cash" && !mp.cashEnabled()) {
+      throw new Error("Pagamento na loja indisponível.");
+    }
+
     try {
-      const orderId = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx) => {
+        let payUrl: string | null = null;
         const order = await tx.order.create({
           data: {
             user_id: context.user.id,
@@ -261,7 +273,7 @@ export const createOrderFn = createServerFn({ method: "POST" })
             shipping: 0,
             discount: 0,
             total: 0,
-            payment_method: data.payment_method,
+            payment_method: data.payment_method === "online" ? "mercadopago" : "cash",
             address_json: data.address,
           },
         });
@@ -341,10 +353,51 @@ export const createOrderFn = createServerFn({ method: "POST" })
           data: { subtotal, shipping, discount, total },
         });
 
-        return order.id;
-      });
-      return { id: orderId };
+        // Cobrança no Mercado Pago. Se falhar, a transação inteira é desfeita
+        // (pedido e baixa de estoque), então não sobra pedido "fantasma".
+        if (data.payment_method === "online") {
+          const pref = await mp.createPreference({
+            orderId: order.id,
+            total: total.toNumber(),
+            email: context.user.email,
+          });
+          payUrl = pref.url;
+          await tx.order.update({
+            where: { id: order.id },
+            data: { payment_url: pref.url, mp_preference_id: pref.id },
+          });
+        }
+
+        return { id: order.id, url: payUrl };
+      }, { maxWait: 10_000, timeout: 30_000 });
+      return { id: result.id, payment_url: result.url };
     } catch (e) {
       throw friendlyError(e);
     }
+  });
+
+// ───────────── Pagamento ─────────────
+
+/** Formas de pagamento disponíveis (definidas por variáveis de ambiente no servidor). */
+export const getPaymentConfigFn = createServerFn({ method: "POST" }).handler(async () => {
+  const mp = await import("./mercadopago.server");
+  return {
+    online: mp.mpEnabled(),
+    cash: mp.cashEnabled(),
+    max_installments: mp.maxInstallments(),
+  };
+});
+
+/** Confere no Mercado Pago o pagamento de um pedido do próprio usuário (ao voltar do checkout). */
+export const syncOrderPaymentFn = createServerFn({ method: "POST" })
+  .middleware([requireUser])
+  .validator(z.object({ order_id: z.string().uuid() }))
+  .handler(async ({ data, context }) => {
+    const mp = await import("./mercadopago.server");
+    try {
+      await mp.syncOrderPayment(data.order_id, context.user.id);
+    } catch (e) {
+      console.error("[mercadopago] sync", e);
+    }
+    return { ok: true as const };
   });

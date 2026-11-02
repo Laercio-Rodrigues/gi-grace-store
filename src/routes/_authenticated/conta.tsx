@@ -1,9 +1,16 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { run } from "@/lib/api";
-import { getProfileFn, listMyOrdersFn, updateProfileFn } from "@/server/store.functions";
+import {
+  getProfileFn,
+  listMyOrdersFn,
+  syncOrderPaymentFn,
+  updateProfileFn,
+} from "@/server/store.functions";
+import { PAYMENT_STATUS_LABEL, PAYMENT_STATUS_STYLE, paymentMethodLabel } from "@/lib/payment";
+import { z } from "zod";
 import { useAuth } from "@/lib/auth-context";
 import { brl } from "@/lib/format";
 import { resolveImage } from "@/lib/assets";
@@ -17,6 +24,10 @@ export const Route = createFileRoute("/_authenticated/conta")({
       { property: "og:title", content: "Minha Conta" },
       { property: "og:description", content: "Perfil, pedidos e endereços." },
     ],
+  }),
+  validateSearch: z.object({
+    pagamento: z.enum(["sucesso", "pendente", "falha"]).optional(),
+    pedido: z.string().optional(),
   }),
   component: Conta,
 });
@@ -33,6 +44,25 @@ function Conta() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [tab, setTab] = useState<"perfil" | "pedidos">("pedidos");
+  const { pagamento, pedido } = Route.useSearch();
+  const qc = useQueryClient();
+
+  // Ao voltar do Mercado Pago, confere o pagamento (caso o aviso automático demore)
+  // e atualiza a lista algumas vezes.
+  useEffect(() => {
+    if (!pedido || !user) return;
+    let cancelled = false;
+    (async () => {
+      for (let i = 0; i < 4 && !cancelled; i++) {
+        await syncOrderPaymentFn({ data: { order_id: pedido } }).catch(() => undefined);
+        await qc.invalidateQueries({ queryKey: ["orders", user.id] });
+        await new Promise((r) => setTimeout(r, 4000));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [pedido, user, qc]);
 
   const orders = useQuery({
     queryKey: ["orders", user?.id],
@@ -95,6 +125,24 @@ function Conta() {
         ))}
       </div>
 
+      {pagamento && (
+        <div
+          className={`mb-6 rounded-lg border p-4 text-sm ${
+            pagamento === "sucesso"
+              ? "border-success/40 bg-success/10"
+              : pagamento === "pendente"
+                ? "border-warning/40 bg-warning/10"
+                : "border-destructive/40 bg-destructive/10"
+          }`}
+        >
+          {pagamento === "sucesso" && "Pagamento recebido! Estamos confirmando o seu pedido."}
+          {pagamento === "pendente" &&
+            "Pagamento em análise. Assim que for confirmado, o pedido será atualizado aqui."}
+          {pagamento === "falha" &&
+            "O pagamento não foi concluído. Você pode tentar de novo pelo botão “Pagar agora” abaixo."}
+        </div>
+      )}
+
       {tab === "pedidos" && (
         <div className="space-y-4">
           {orders.data?.length === 0 && (
@@ -115,9 +163,20 @@ function Conta() {
                     })}
                   </div>
                 </div>
-                <span className="text-xs font-bold uppercase tracking-widest bg-surface px-3 py-1.5 rounded-full">
-                  {STATUS_LABEL[o.status] ?? o.status}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full ${
+                      PAYMENT_STATUS_STYLE[o.payment_status] ?? "bg-surface"
+                    }`}
+                  >
+                    {o.payment_method === "cash" && o.payment_status === "pending"
+                      ? "Pagar na loja"
+                      : (PAYMENT_STATUS_LABEL[o.payment_status] ?? o.payment_status)}
+                  </span>
+                  <span className="text-xs font-bold uppercase tracking-widest bg-surface px-3 py-1.5 rounded-full">
+                    {STATUS_LABEL[o.status] ?? o.status}
+                  </span>
+                </div>
               </div>
               <div className="space-y-2">
                 {(o.items ?? []).map((i, idx) => (
@@ -141,6 +200,17 @@ function Conta() {
                 <span>Total</span>
                 <span className="text-lg">{brl(o.total)}</span>
               </div>
+              <div className="mt-2 text-xs text-muted-foreground">
+                Pagamento: {paymentMethodLabel(o.payment_method)}
+              </div>
+              {o.payment_url && o.payment_status !== "approved" && o.status === "pending" && (
+                <a
+                  href={o.payment_url}
+                  className="mt-4 inline-block rounded-md bg-brand px-5 py-3 text-xs font-bold uppercase tracking-widest text-brand-foreground hover:opacity-90"
+                >
+                  Pagar agora
+                </a>
+              )}
             </div>
           ))}
         </div>

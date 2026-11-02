@@ -188,7 +188,15 @@ export const adminOrdersFn = createServerFn({ method: "POST" }).middleware([requ
   const { prisma } = await import("./db.server");
   const { plain } = await import("./serialize.server");
   const rows = await prisma.order.findMany({
-    select: { id: true, total: true, status: true, payment_method: true, created_at: true, user_id: true },
+    select: {
+      id: true,
+      total: true,
+      status: true,
+      payment_method: true,
+      payment_status: true,
+      created_at: true,
+      user_id: true,
+    },
     orderBy: { created_at: "desc" },
   });
   return plain(rows);
@@ -209,7 +217,20 @@ export const adminSetOrderStatusFn = createServerFn({ method: "POST" }).middlewa
     const { prisma } = await import("./db.server");
     const { friendlyError } = await import("./serialize.server");
     try {
-      await prisma.order.update({ where: { id: data.id }, data: { status: data.status } });
+      const current = await prisma.order.findUnique({
+        where: { id: data.id },
+        select: { payment_status: true, paid_at: true },
+      });
+      await prisma.order.update({
+        where: { id: data.id },
+        data: {
+          status: data.status,
+          // Marcar como pago manualmente (ex.: dinheiro na loja) também aprova o pagamento.
+          ...(data.status === "paid" && current && current.payment_status !== "approved"
+            ? { payment_status: "approved" as const, paid_at: current.paid_at ?? new Date() }
+            : {}),
+        },
+      });
       return { ok: true as const };
     } catch (e) {
       throw friendlyError(e);

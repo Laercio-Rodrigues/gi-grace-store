@@ -135,7 +135,7 @@ function Home() {
         <div className="container-app grid grid-cols-2 md:grid-cols-4 gap-6 py-8">
           {[
             { icon: Truck, label: "Frete grátis", sub: "acima de R$ 499" },
-            { icon: ShieldCheck, label: "Pagamento seguro", sub: "Pix, boleto e cartão" },
+            { icon: ShieldCheck, label: "Pagamento seguro", sub: "Pix e cartão" },
             { icon: RotateCcw, label: "Troca fácil", sub: "em até 30 dias" },
             { icon: Trophy, label: "Marcas oficiais", sub: "Atama, Kingz, Tatami..." },
           ].map((p) => (
