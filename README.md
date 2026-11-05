@@ -940,14 +940,14 @@ SELECT id, lower(email), encrypted_password, created_at FROM auth.users;
 ```
 
 
-## Pagamentos (Mercado Pago – Checkout Pro)
+## Pagamentos (Mercado Pago – Checkout Pro via API de Orders)
 
-O checkout cria o pedido, gera a cobrança no Mercado Pago e leva o cliente à página segura de pagamento (PIX ou cartão, com parcelamento). O pedido é marcado como **pago** automaticamente quando o Mercado Pago avisa o servidor (webhook), e o valor é sempre conferido na API do Mercado Pago antes de aprovar.
+O checkout cria o pedido, cria uma *order* no Mercado Pago e leva o cliente à página segura de pagamento (PIX ou cartão, com parcelamento). O pedido é marcado como **pago** automaticamente quando o Mercado Pago avisa o servidor (webhook), e a order é sempre reconsultada na API do Mercado Pago e o valor conferido antes de aprovar.
 
-1. Crie uma aplicação em *Suas integrações* no Mercado Pago e copie o **Access Token** (`MP_ACCESS_TOKEN`).
-2. Em *Webhooks*, cadastre `https://SEU-DOMINIO/api/mercadopago/webhook` com o evento **Pagamentos** e copie a chave secreta para `MP_WEBHOOK_SECRET`.
-3. Teste com credenciais de teste e usuários de teste do Mercado Pago antes de usar as de produção.
+1. Em *Suas integrações*, crie uma aplicação **Checkout Pro** com *Tipo de API = API de Orders* e copie o **Access Token** (`MP_ACCESS_TOKEN`).
+2. Em *Webhooks > Configurar notificações*, cadastre `https://SEU-DOMINIO/api/mercadopago/webhook` com o evento **Order (Mercado Pago)** e copie a chave secreta para `MP_WEBHOOK_SECRET`.
+3. Teste com contas de teste do Mercado Pago antes de usar as credenciais de produção. Se a API responder `invalid_credentials` com o token de teste, use as credenciais de produção de um **usuário de teste vendedor** (instrução do próprio Mercado Pago).
 4. Dinheiro na loja: defina `ALLOW_CASH_PICKUP=true`; depois marque o pedido como "Pago" em Admin > Pedidos.
 5. Taxas, prazos de recebimento, juros do parcelamento e a conta bancária de saque (ex.: Nubank) são configurados no painel do Mercado Pago.
 
-Pedidos não pagos continuam reservando estoque; cancele-os pelo admin se forem abandonados.
+Pedidos não pagos continuam reservando estoque até a cobrança expirar e o pedido ser cancelado pelo admin.

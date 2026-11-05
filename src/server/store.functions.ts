@@ -87,7 +87,6 @@ export const fetchProductBySlugFn = createServerFn({ method: "POST" })
         sizes: {
           select: { stock: true, size: { select: { id: true, name: true, position: true } } },
         },
-        reviews: { select: { rating: true } },
       },
     });
     return row ? plain(row) : null;
@@ -290,11 +289,6 @@ export const createOrderFn = createServerFn({ method: "POST" })
 
           const unit = product.sale_price ?? product.price;
 
-          if (!sizeName) {
-            const hasSizes = await tx.productSize.count({ where: { product_id: product.id } });
-            if (hasSizes > 0) throw new Error(`Selecione um tamanho para ${product.name}`);
-          }
-
           if (sizeName) {
             const ps = await tx.productSize.findFirst({
               where: { product_id: product.id, size: { name: sizeName } },
@@ -359,18 +353,18 @@ export const createOrderFn = createServerFn({ method: "POST" })
           data: { subtotal, shipping, discount, total },
         });
 
-        // Cobrança no Mercado Pago. Se falhar, a transação inteira é desfeita
+        // Order no Mercado Pago (Checkout Pro). Se falhar, a transação inteira é desfeita
         // (pedido e baixa de estoque), então não sobra pedido "fantasma".
         if (data.payment_method === "online") {
-          const pref = await mp.createPreference({
+          const mpOrder = await mp.createOrder({
             orderId: order.id,
             total: total.toNumber(),
             email: context.user.email,
           });
-          payUrl = pref.url;
+          payUrl = mpOrder.url;
           await tx.order.update({
             where: { id: order.id },
-            data: { payment_url: pref.url, mp_preference_id: pref.id },
+            data: { payment_url: mpOrder.url, mp_order_id: mpOrder.id },
           });
         }
 

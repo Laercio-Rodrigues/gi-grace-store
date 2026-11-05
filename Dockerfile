@@ -7,10 +7,6 @@ COPY package*.json ./
 COPY prisma ./prisma
 RUN npm install
 COPY . .
-# VITE_* é lido em tempo de BUILD (canonical, og:url, sitemap). No Easypanel, defina
-# VITE_SITE_URL (ex.: https://sualoja.com.br) em "Ambiente" / "Build args" e refaça o deploy.
-ARG VITE_SITE_URL=""
-ENV VITE_SITE_URL=$VITE_SITE_URL
 RUN npx prisma generate && npm run build
 
 # ── Produção ──
@@ -29,5 +25,4 @@ ENV HOST=0.0.0.0
 ENV PORT=3000
 
 # Aplica as migrations pendentes e sobe o servidor.
-# SEED_ON_START=true também roda o seed (idempotente: não duplica nada) a cada start.
-CMD ["sh", "-c", "npx prisma migrate deploy && if [ \"$SEED_ON_START\" = \"true\" ]; then npx prisma db seed || echo 'seed falhou (seguindo mesmo assim)'; fi && node .output/server/index.mjs"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node .output/server/index.mjs"]
