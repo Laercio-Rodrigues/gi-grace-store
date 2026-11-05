@@ -304,7 +304,7 @@ model Order {
   // pagamento (Mercado Pago)
   payment_status   PaymentStatus @default(pending)
   payment_url      String?
-  mp_preference_id String?
+  mp_order_id      String?
   mp_payment_id    String?       @unique
   paid_at          DateTime?     @db.Timestamptz(3)
 

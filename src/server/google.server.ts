@@ -42,13 +42,7 @@ function readCookie(request: Request, name: string) {
   const header = request.headers.get("cookie") ?? "";
   for (const part of header.split(";")) {
     const [k, ...v] = part.trim().split("=");
-    if (k === name) {
-      try {
-        return decodeURIComponent(v.join("="));
-      } catch {
-        return null;
-      }
-    }
+    if (k === name) return decodeURIComponent(v.join("="));
   }
   return null;
 }

@@ -45,7 +45,8 @@ function ErrorComponent({
   reset: () => void;
 }) {
   const router = useRouter();
-  if (error) console.error(error);
+
+  // Mantenha o restante do seu código aqui
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -97,7 +98,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", type: "image/png", href: "/favicon.png" },
-      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "apple-touch-icon", href: "/favicon.png" },
 
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },

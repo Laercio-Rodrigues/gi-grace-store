@@ -8,7 +8,6 @@ import { resolveImage } from "@/lib/assets";
 import { brl, cx } from "@/lib/format";
 import { useCart } from "@/lib/cart-context";
 import { ProductCard } from "@/components/product-card";
-import { SizeGuide } from "@/components/size-guide";
 import { run } from "@/lib/api";
 import { addFavoriteFn } from "@/server/store.functions";
 import { useAuth } from "@/lib/auth-context";
@@ -105,25 +104,17 @@ type ProductRow = {
   category: { name: string; slug: string } | null;
   images: { image_url: string; position: number }[];
   sizes: { stock: number; size: { id: string; name: string; position: number } }[];
-  reviews?: { rating: number }[];
 };
 
 function ProductPage() {
   const { product } = Route.useLoaderData() as { product: ProductRow };
-  // key: ao navegar de um produto para outro (ex.: relacionados) o estado local
-  // (tamanho, quantidade, foto) precisa reiniciar.
-  return <ProductView key={product.id} product={product} />;
-}
-
-function ProductView({ product }: { product: ProductRow }) {
   const { addItem } = useCart();
   const { user } = useAuth();
   const [imgIdx, setImgIdx] = useState(0);
   const [qty, setQty] = useState(1);
-  const [sizeId, setSizeId] = useState<string | null>(() => {
-    const sorted = [...(product.sizes ?? [])].sort((a, b) => a.size.position - b.size.position);
-    return (sorted.find((s) => s.stock > 0) ?? sorted[0])?.size.id ?? null;
-  });
+  const [sizeId, setSizeId] = useState<string | null>(
+    product.sizes?.[0]?.size.id ?? null,
+  );
 
   const { data: all } = useQuery({ queryKey: ["products"], queryFn: fetchProducts });
   const related = (all ?? [])
@@ -135,12 +126,6 @@ function ProductView({ product }: { product: ProductRow }) {
   );
   const selectedSize = sortedSizes.find((s) => s.size.id === sizeId);
   const outOfStock = product.stock <= 0;
-  // O servidor aceita no máximo 20 por item e nunca mais que o estoque.
-  const maxQty = Math.max(1, Math.min(20, selectedSize ? selectedSize.stock : product.stock));
-  const reviewCount = product.reviews?.length ?? 0;
-  const avgRating = reviewCount
-    ? product.reviews!.reduce((n, r) => n + r.rating, 0) / reviewCount
-    : 0;
   const hasSale = product.sale_price != null && product.sale_price < product.price;
   const price = hasSale ? product.sale_price! : product.price;
   const off = hasSale ? Math.round((1 - product.sale_price! / product.price) * 100) : 0;
@@ -232,21 +217,14 @@ function ProductView({ product }: { product: ProductRow }) {
           </div>
           <h1 className="text-display text-3xl md:text-4xl mt-2">{product.name}</h1>
 
-          {reviewCount > 0 && (
-            <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
-              <div className="flex gap-0.5">
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <Star
-                    key={n}
-                    className={cx("h-4 w-4", n <= Math.round(avgRating) ? "fill-brand text-brand" : "text-muted-foreground/40")}
-                  />
-                ))}
-              </div>
-              <span>
-                {avgRating.toFixed(1).replace(".", ",")} ({reviewCount} avaliaç{reviewCount === 1 ? "ão" : "ões"})
-              </span>
+          <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
+            <div className="flex gap-0.5">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <Star key={n} className="h-4 w-4 fill-brand text-brand" />
+              ))}
             </div>
-          )}
+            <span>(128 avaliações)</span>
+          </div>
 
           <div className="mt-6 flex items-baseline gap-3">
             <span className="text-4xl font-bold">{brl(price)}</span>
@@ -269,10 +247,7 @@ function ProductView({ product }: { product: ProductRow }) {
             <div className="mt-8">
               <div className="flex items-center justify-between mb-3">
                 <div className="text-xs font-bold uppercase tracking-widest">Tamanho</div>
-                <SizeGuide
-                  sizeNames={sortedSizes.map((s) => s.size.name)}
-                  selected={selectedSize?.size.name}
-                />
+                <button className="text-xs text-muted-foreground underline">Guia de tamanhos</button>
               </div>
               <div className="flex flex-wrap gap-2">
                 {sortedSizes.map((s) => {
@@ -282,10 +257,7 @@ function ProductView({ product }: { product: ProductRow }) {
                     <button
                       key={s.size.id}
                       disabled={disabled}
-                      onClick={() => {
-                        setSizeId(s.size.id);
-                        setQty((q) => Math.min(q, Math.max(1, Math.min(20, s.stock))));
-                      }}
+                      onClick={() => setSizeId(s.size.id)}
                       className={cx(
                         "min-w-14 h-12 px-4 border-2 rounded-md text-sm font-bold uppercase tracking-wider transition-colors",
                         active
@@ -314,7 +286,7 @@ function ProductView({ product }: { product: ProductRow }) {
               </button>
               <span className="min-w-10 text-center font-bold">{qty}</span>
               <button
-                onClick={() => setQty((q) => Math.min(maxQty, q + 1))}
+                onClick={() => setQty((q) => q + 1)}
                 className="p-3"
                 aria-label="Aumentar quantidade"
               >
@@ -323,7 +295,7 @@ function ProductView({ product }: { product: ProductRow }) {
 
             </div>
             <span className="text-xs text-muted-foreground">
-              {selectedSize ? selectedSize.stock : product.stock} unidades em estoque
+              {product.stock} unidades em estoque
             </span>
           </div>
 

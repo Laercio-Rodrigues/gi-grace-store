@@ -170,7 +170,7 @@ function Checkout() {
           </section>
         </div>
 
-        <aside className="lg:sticky lg:top-32 h-fit p-6 bg-card border border-border rounded-lg space-y-4">
+        <aside className="lg:sticky lg:top-24 h-fit p-6 bg-card border border-border rounded-lg space-y-4">
           <h2 className="text-lg font-bold">Seu pedido</h2>
           <ul className="space-y-3 max-h-64 overflow-y-auto">
             {items.map((i) => (
