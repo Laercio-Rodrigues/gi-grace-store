@@ -8,6 +8,7 @@ import { resolveImage } from "@/lib/assets";
 import { brl, cx } from "@/lib/format";
 import { useCart } from "@/lib/cart-context";
 import { ProductCard } from "@/components/product-card";
+import { SizeGuide } from "@/components/size-guide";
 import { run } from "@/lib/api";
 import { addFavoriteFn } from "@/server/store.functions";
 import { useAuth } from "@/lib/auth-context";
@@ -268,7 +269,10 @@ function ProductView({ product }: { product: ProductRow }) {
             <div className="mt-8">
               <div className="flex items-center justify-between mb-3">
                 <div className="text-xs font-bold uppercase tracking-widest">Tamanho</div>
-                <button className="text-xs text-muted-foreground underline">Guia de tamanhos</button>
+                <SizeGuide
+                  sizeNames={sortedSizes.map((s) => s.size.name)}
+                  selected={selectedSize?.size.name}
+                />
               </div>
               <div className="flex flex-wrap gap-2">
                 {sortedSizes.map((s) => {
