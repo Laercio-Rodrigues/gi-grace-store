@@ -34,6 +34,7 @@ import { Route as AuthenticatedAdminMarcasRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminPedidosRouteImport } from './routes/_authenticated/admin/pedidos'
 import { Route as AuthenticatedAdminProdutosRouteImport } from './routes/_authenticated/admin/produtos'
 import { Route as ApiAuthGoogleRouteImport } from './routes/api/auth/google'
+import { Route as ApiMercadopagoWebhookRouteImport } from './routes/api/mercadopago.webhook'
 import { Route as AuthenticatedAdminFaturamentoIdRouteImport } from './routes/_authenticated/admin/faturamento.$id'
 import { Route as AuthenticatedAdminFaturamentoNovaRouteImport } from './routes/_authenticated/admin/faturamento.nova'
 import { Route as AuthenticatedAdminPedidosIdRouteImport } from './routes/_authenticated/admin/pedidos.$id'
@@ -175,6 +176,11 @@ const ApiAuthGoogleRoute = ApiAuthGoogleRouteImport.update({
   path: '/api/auth/google',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMercadopagoWebhookRoute = ApiMercadopagoWebhookRouteImport.update({
+  id: '/api/mercadopago/webhook',
+  path: '/api/mercadopago/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminFaturamentoIdRoute =
   AuthenticatedAdminFaturamentoIdRouteImport.update({
     id: '/$id',
@@ -229,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/admin/pedidos': typeof AuthenticatedAdminPedidosRouteWithChildren
   '/admin/produtos': typeof AuthenticatedAdminProdutosRouteWithChildren
   '/api/auth/google': typeof ApiAuthGoogleRouteWithChildren
+  '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/faturamento/$id': typeof AuthenticatedAdminFaturamentoIdRoute
   '/admin/faturamento/nova': typeof AuthenticatedAdminFaturamentoNovaRoute
@@ -259,6 +266,7 @@ export interface FileRoutesByTo {
   '/admin/pedidos': typeof AuthenticatedAdminPedidosRouteWithChildren
   '/admin/produtos': typeof AuthenticatedAdminProdutosRouteWithChildren
   '/api/auth/google': typeof ApiAuthGoogleRouteWithChildren
+  '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/faturamento/$id': typeof AuthenticatedAdminFaturamentoIdRoute
   '/admin/faturamento/nova': typeof AuthenticatedAdminFaturamentoNovaRoute
@@ -292,6 +300,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/pedidos': typeof AuthenticatedAdminPedidosRouteWithChildren
   '/_authenticated/admin/produtos': typeof AuthenticatedAdminProdutosRouteWithChildren
   '/api/auth/google': typeof ApiAuthGoogleRouteWithChildren
+  '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/faturamento/$id': typeof AuthenticatedAdminFaturamentoIdRoute
   '/_authenticated/admin/faturamento/nova': typeof AuthenticatedAdminFaturamentoNovaRoute
@@ -325,6 +334,7 @@ export interface FileRouteTypes {
     | '/admin/pedidos'
     | '/admin/produtos'
     | '/api/auth/google'
+    | '/api/mercadopago/webhook'
     | '/admin/'
     | '/admin/faturamento/$id'
     | '/admin/faturamento/nova'
@@ -355,6 +365,7 @@ export interface FileRouteTypes {
     | '/admin/pedidos'
     | '/admin/produtos'
     | '/api/auth/google'
+    | '/api/mercadopago/webhook'
     | '/admin'
     | '/admin/faturamento/$id'
     | '/admin/faturamento/nova'
@@ -387,6 +398,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/pedidos'
     | '/_authenticated/admin/produtos'
     | '/api/auth/google'
+    | '/api/mercadopago/webhook'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/faturamento/$id'
     | '/_authenticated/admin/faturamento/nova'
@@ -405,6 +417,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ProdutoSlugRoute: typeof ProdutoSlugRoute
   ApiAuthGoogleRoute: typeof ApiAuthGoogleRouteWithChildren
+  ApiMercadopagoWebhookRoute: typeof ApiMercadopagoWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -584,6 +597,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthGoogleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/mercadopago/webhook': {
+      id: '/api/mercadopago/webhook'
+      path: '/api/mercadopago/webhook'
+      fullPath: '/api/mercadopago/webhook'
+      preLoaderRoute: typeof ApiMercadopagoWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/faturamento/$id': {
       id: '/_authenticated/admin/faturamento/$id'
       path: '/$id'
@@ -745,6 +765,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ProdutoSlugRoute: ProdutoSlugRoute,
   ApiAuthGoogleRoute: ApiAuthGoogleRouteWithChildren,
+  ApiMercadopagoWebhookRoute: ApiMercadopagoWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
