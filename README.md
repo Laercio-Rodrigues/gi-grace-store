@@ -951,3 +951,10 @@ O checkout cria o pedido, cria uma *order* no Mercado Pago e leva o cliente à p
 5. Taxas, prazos de recebimento, juros do parcelamento e a conta bancária de saque (ex.: Nubank) são configurados no painel do Mercado Pago.
 
 Pedidos não pagos continuam reservando estoque até a cobrança expirar e o pedido ser cancelado pelo admin.
+
+## Identidade visual e rodapé
+
+- **Logo e nome da loja:** edite `src/lib/brand.ts` (arquivo do logo, formato oval/círculo/arredondado, tamanhos e o nome ao lado). A imagem fica em `public/images`.
+- **Redes sociais do rodapé** (Instagram, YouTube, WhatsApp) e o e-mail de contato: Admin > **Redes sociais**. Ícone sem dado cadastrado não aparece.
+- **Newsletter:** os e-mails do rodapé ficam salvos e aparecem na mesma tela do admin.
+- **Guia de tamanhos:** botão na página do produto e página `/guia-tamanhos` (tabelas em `src/components/size-guide.tsx`).

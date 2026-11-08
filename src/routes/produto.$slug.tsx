@@ -11,6 +11,7 @@ import { ProductCard } from "@/components/product-card";
 import { run } from "@/lib/api";
 import { addFavoriteFn } from "@/server/store.functions";
 import { useAuth } from "@/lib/auth-context";
+import { SizeGuide } from "@/components/size-guide";
 import { SITE_URL } from "@/lib/site";
 
 
@@ -247,7 +248,10 @@ function ProductPage() {
             <div className="mt-8">
               <div className="flex items-center justify-between mb-3">
                 <div className="text-xs font-bold uppercase tracking-widest">Tamanho</div>
-                <button className="text-xs text-muted-foreground underline">Guia de tamanhos</button>
+                <SizeGuide
+                  sizeNames={sortedSizes.map((s) => s.size.name)}
+                  selected={sortedSizes.find((s) => s.size.id === sizeId)?.size.name ?? null}
+                />
               </div>
               <div className="flex flex-wrap gap-2">
                 {sortedSizes.map((s) => {

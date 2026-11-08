@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CarrinhoRouteImport } from './routes/carrinho'
 import { Route as GuiaFaixasRouteImport } from './routes/guia-faixas'
+import { Route as GuiaTamanhosRouteImport } from './routes/guia-tamanhos'
 import { Route as ProdutosRouteImport } from './routes/produtos'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
@@ -33,6 +34,7 @@ import { Route as AuthenticatedAdminFaturamentoRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminMarcasRouteImport } from './routes/_authenticated/admin/marcas'
 import { Route as AuthenticatedAdminPedidosRouteImport } from './routes/_authenticated/admin/pedidos'
 import { Route as AuthenticatedAdminProdutosRouteImport } from './routes/_authenticated/admin/produtos'
+import { Route as AuthenticatedAdminRodapeRouteImport } from './routes/_authenticated/admin/rodape'
 import { Route as ApiAuthGoogleRouteImport } from './routes/api/auth/google'
 import { Route as ApiMercadopagoWebhookRouteImport } from './routes/api/mercadopago.webhook'
 import { Route as AuthenticatedAdminFaturamentoIdRouteImport } from './routes/_authenticated/admin/faturamento.$id'
@@ -63,6 +65,11 @@ const CarrinhoRoute = CarrinhoRouteImport.update({
 const GuiaFaixasRoute = GuiaFaixasRouteImport.update({
   id: '/guia-faixas',
   path: '/guia-faixas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuiaTamanhosRoute = GuiaTamanhosRouteImport.update({
+  id: '/guia-tamanhos',
+  path: '/guia-tamanhos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProdutosRoute = ProdutosRouteImport.update({
@@ -171,6 +178,12 @@ const AuthenticatedAdminProdutosRoute =
     path: '/produtos',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminRodapeRoute =
+  AuthenticatedAdminRodapeRouteImport.update({
+    id: '/rodape',
+    path: '/rodape',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const ApiAuthGoogleRoute = ApiAuthGoogleRouteImport.update({
   id: '/api/auth/google',
   path: '/api/auth/google',
@@ -216,6 +229,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/carrinho': typeof CarrinhoRoute
   '/guia-faixas': typeof GuiaFaixasRoute
+  '/guia-tamanhos': typeof GuiaTamanhosRoute
   '/produtos': typeof ProdutosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
@@ -234,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/admin/marcas': typeof AuthenticatedAdminMarcasRoute
   '/admin/pedidos': typeof AuthenticatedAdminPedidosRouteWithChildren
   '/admin/produtos': typeof AuthenticatedAdminProdutosRouteWithChildren
+  '/admin/rodape': typeof AuthenticatedAdminRodapeRoute
   '/api/auth/google': typeof ApiAuthGoogleRouteWithChildren
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -248,6 +263,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/carrinho': typeof CarrinhoRoute
   '/guia-faixas': typeof GuiaFaixasRoute
+  '/guia-tamanhos': typeof GuiaTamanhosRoute
   '/produtos': typeof ProdutosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/checkout': typeof AuthenticatedCheckoutRoute
@@ -265,6 +281,7 @@ export interface FileRoutesByTo {
   '/admin/marcas': typeof AuthenticatedAdminMarcasRoute
   '/admin/pedidos': typeof AuthenticatedAdminPedidosRouteWithChildren
   '/admin/produtos': typeof AuthenticatedAdminProdutosRouteWithChildren
+  '/admin/rodape': typeof AuthenticatedAdminRodapeRoute
   '/api/auth/google': typeof ApiAuthGoogleRouteWithChildren
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -281,6 +298,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/carrinho': typeof CarrinhoRoute
   '/guia-faixas': typeof GuiaFaixasRoute
+  '/guia-tamanhos': typeof GuiaTamanhosRoute
   '/produtos': typeof ProdutosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
@@ -299,6 +317,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/marcas': typeof AuthenticatedAdminMarcasRoute
   '/_authenticated/admin/pedidos': typeof AuthenticatedAdminPedidosRouteWithChildren
   '/_authenticated/admin/produtos': typeof AuthenticatedAdminProdutosRouteWithChildren
+  '/_authenticated/admin/rodape': typeof AuthenticatedAdminRodapeRoute
   '/api/auth/google': typeof ApiAuthGoogleRouteWithChildren
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -315,6 +334,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/carrinho'
     | '/guia-faixas'
+    | '/guia-tamanhos'
     | '/produtos'
     | '/sitemap.xml'
     | '/admin'
@@ -333,6 +353,7 @@ export interface FileRouteTypes {
     | '/admin/marcas'
     | '/admin/pedidos'
     | '/admin/produtos'
+    | '/admin/rodape'
     | '/api/auth/google'
     | '/api/mercadopago/webhook'
     | '/admin/'
@@ -347,6 +368,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/carrinho'
     | '/guia-faixas'
+    | '/guia-tamanhos'
     | '/produtos'
     | '/sitemap.xml'
     | '/checkout'
@@ -364,6 +386,7 @@ export interface FileRouteTypes {
     | '/admin/marcas'
     | '/admin/pedidos'
     | '/admin/produtos'
+    | '/admin/rodape'
     | '/api/auth/google'
     | '/api/mercadopago/webhook'
     | '/admin'
@@ -379,6 +402,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/carrinho'
     | '/guia-faixas'
+    | '/guia-tamanhos'
     | '/produtos'
     | '/sitemap.xml'
     | '/_authenticated/admin'
@@ -397,6 +421,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/marcas'
     | '/_authenticated/admin/pedidos'
     | '/_authenticated/admin/produtos'
+    | '/_authenticated/admin/rodape'
     | '/api/auth/google'
     | '/api/mercadopago/webhook'
     | '/_authenticated/admin/'
@@ -413,6 +438,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CarrinhoRoute: typeof CarrinhoRoute
   GuiaFaixasRoute: typeof GuiaFaixasRoute
+  GuiaTamanhosRoute: typeof GuiaTamanhosRoute
   ProdutosRoute: typeof ProdutosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ProdutoSlugRoute: typeof ProdutoSlugRoute
@@ -455,6 +481,13 @@ declare module '@tanstack/react-router' {
       path: '/guia-faixas'
       fullPath: '/guia-faixas'
       preLoaderRoute: typeof GuiaFaixasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guia-tamanhos': {
+      id: '/guia-tamanhos'
+      path: '/guia-tamanhos'
+      fullPath: '/guia-tamanhos'
+      preLoaderRoute: typeof GuiaTamanhosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/produtos': {
@@ -590,6 +623,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminProdutosRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/rodape': {
+      id: '/_authenticated/admin/rodape'
+      path: '/rodape'
+      fullPath: '/admin/rodape'
+      preLoaderRoute: typeof AuthenticatedAdminRodapeRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/api/auth/google': {
       id: '/api/auth/google'
       path: '/api/auth/google'
@@ -699,6 +739,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminMarcasRoute: typeof AuthenticatedAdminMarcasRoute
   AuthenticatedAdminPedidosRoute: typeof AuthenticatedAdminPedidosRouteWithChildren
   AuthenticatedAdminProdutosRoute: typeof AuthenticatedAdminProdutosRouteWithChildren
+  AuthenticatedAdminRodapeRoute: typeof AuthenticatedAdminRodapeRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
@@ -718,6 +759,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminPedidosRoute: AuthenticatedAdminPedidosRouteWithChildren,
     AuthenticatedAdminProdutosRoute:
       AuthenticatedAdminProdutosRouteWithChildren,
+    AuthenticatedAdminRodapeRoute: AuthenticatedAdminRodapeRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   }
 
@@ -761,6 +803,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CarrinhoRoute: CarrinhoRoute,
   GuiaFaixasRoute: GuiaFaixasRoute,
+  GuiaTamanhosRoute: GuiaTamanhosRoute,
   ProdutosRoute: ProdutosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ProdutoSlugRoute: ProdutoSlugRoute,

@@ -501,3 +501,27 @@ model PaymentAccount {
 
   @@map("payment_accounts")
 }
+
+// ───────────────────────── Site: redes sociais e newsletter ─────────────────────────
+
+model SiteSettings {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  singleton        Boolean  @unique @default(true)
+  instagram_url    String?
+  youtube_url      String?
+  whatsapp_number  String?
+  whatsapp_message String?
+  contact_email    String?
+  created_at       DateTime @default(now()) @db.Timestamptz(3)
+  updated_at       DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@map("site_settings")
+}
+
+model NewsletterSubscriber {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email      String   @unique
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+
+  @@map("newsletter_subscribers")
+}

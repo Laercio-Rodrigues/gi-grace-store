@@ -47,7 +47,7 @@ const money = (n: number) => (Math.round(n * 100) / 100).toFixed(2);
 
 type OrderInput = { orderId: string; total: number; email: string };
 
-function buildOrderBody(input: OrderInput, level: "full" | "minimal") {
+function buildOrderBody(input: OrderInput, level: "full" | "minimal" | "bare") {
   const base = baseUrl();
   const https = base.startsWith("https://");
   const url = (state: string) => `${base}/conta?pagamento=${state}&pedido=${input.orderId}`;
@@ -87,14 +87,15 @@ function buildOrderBody(input: OrderInput, level: "full" | "minimal") {
     payer: { email: input.email },
     // O total (já com frete e desconto) é calculado no servidor.
     items: [{ title, unit_price: money(input.total), quantity: 1 }],
-    config: { online, payment_method: paymentMethod },
+    // "bare": sem endereços de retorno (último recurso, ex.: se o MP recusar URLs localhost nos testes)
+    config: level === "bare" ? { payment_method: paymentMethod } : { online, payment_method: paymentMethod },
   };
 }
 
 export async function createOrder(input: OrderInput) {
   let lastStatus = 0;
-  // Se o Mercado Pago rejeitar algum campo opcional (400), tenta de novo com o corpo mínimo.
-  for (const level of ["full", "minimal"] as const) {
+  // Se o Mercado Pago rejeitar algum campo opcional (400), tenta de novo com um corpo mais simples.
+  for (const level of ["full", "minimal", "bare"] as const) {
     const res = await mpFetch("/v1/orders", {
       method: "POST",
       headers: { "X-Idempotency-Key": crypto.randomUUID() },

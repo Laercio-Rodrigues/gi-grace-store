@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type Row = { size: string; height: string; weight: string };
-type Chart = { title: string; note: string; rows: Row[] };
+export type Chart = { title: string; note: string; rows: Row[] };
 
 // Medidas de referência (variam um pouco entre marcas e modelos).
-const CHARTS: Record<"kimono" | "feminino" | "infantil" | "apparel", Chart> = {
+export const CHARTS: Record<"kimono" | "feminino" | "infantil" | "apparel", Chart> = {
   kimono: {
     title: "Kimono masculino",
     note: "Kimonos de algodão podem encolher até 3% nas primeiras lavagens. Entre dois tamanhos, escolha o maior.",
@@ -57,27 +57,11 @@ function pickChart(sizeNames: string[]): Chart {
   return CHARTS.apparel;
 }
 
-/** Botão "Guia de tamanhos" + janela com a tabela certa para o produto. */
-export function SizeGuide({ sizeNames, selected }: { sizeNames: string[]; selected?: string | null }) {
-  const [open, setOpen] = useState(false);
-  const chart = pickChart(sizeNames);
 
+/** Tabela de medidas (usada na janela do produto e na página /guia-tamanhos). */
+export function SizeChartTable({ chart, selected }: { chart: Chart; selected?: string | null }) {
   return (
-    <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="text-xs text-muted-foreground underline hover:text-brand"
-      >
-        Guia de tamanhos
-      </button>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Guia de tamanhos — {chart.title}</DialogTitle>
-            <DialogDescription>Medidas de referência por altura e peso.</DialogDescription>
-          </DialogHeader>
-          <div className="overflow-hidden rounded-md border border-border">
+    <div className="overflow-hidden rounded-md border border-border">
             <table className="w-full text-sm">
               <thead className="bg-surface text-left text-xs uppercase tracking-widest">
                 <tr>
@@ -100,6 +84,30 @@ export function SizeGuide({ sizeNames, selected }: { sizeNames: string[]; select
               </tbody>
             </table>
           </div>
+  );
+}
+
+/** Botão "Guia de tamanhos" + janela com a tabela certa para o produto. */
+export function SizeGuide({ sizeNames, selected }: { sizeNames: string[]; selected?: string | null }) {
+  const [open, setOpen] = useState(false);
+  const chart = pickChart(sizeNames);
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="text-xs text-muted-foreground underline hover:text-brand"
+      >
+        Guia de tamanhos
+      </button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Guia de tamanhos — {chart.title}</DialogTitle>
+            <DialogDescription>Medidas de referência por altura e peso.</DialogDescription>
+          </DialogHeader>
+          <SizeChartTable chart={chart} selected={selected} />
           <p className="text-xs text-muted-foreground">{chart.note}</p>
         </DialogContent>
       </Dialog>

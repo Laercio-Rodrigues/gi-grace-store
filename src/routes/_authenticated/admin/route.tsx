@@ -12,6 +12,7 @@ import {
   Building2,
   Landmark,
   ShieldCheck,
+  Share2,
 
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
@@ -30,6 +31,7 @@ const TABS = [
   { to: "/admin/cupons", label: "Cupons", icon: Ticket },
   { to: "/admin/banners", label: "Banners", icon: ImageIcon },
   { to: "/admin/empresa", label: "Empresa", icon: Building2 },
+  { to: "/admin/rodape", label: "Redes sociais", icon: Share2 },
   { to: "/admin/administradores", label: "Administradores", icon: ShieldCheck },
 ];
 

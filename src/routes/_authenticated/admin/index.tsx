@@ -26,6 +26,14 @@ import { adminStatsFn } from "@/server/admin.functions";
 import { brl } from "@/lib/format";
 import { resolveImage } from "@/lib/assets";
 
+const STATUS_LABEL: Record<string, string> = {
+  pending: "Pendente",
+  paid: "Pago",
+  shipped: "Enviado",
+  delivered: "Entregue",
+  cancelled: "Cancelado",
+};
+
 const STATUS_COLORS: Record<string, string> = {
   pending: "#F59E0B",
   paid: "#3B82F6",
@@ -102,7 +110,7 @@ function Dashboard() {
       acc[o.status] = (acc[o.status] ?? 0) + 1;
       return acc;
     }, {}),
-  ).map(([status, value]) => ({ status, value }));
+  ).map(([status, value]) => ({ status, label: STATUS_LABEL[status] ?? status, value }));
 
   // Top products
   const topProducts = [...products].sort((a, b) => b.sales_count - a.sales_count).slice(0, 6);
@@ -150,7 +158,7 @@ function Dashboard() {
                 <XAxis dataKey="day" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `R$${v}`} />
                 <Tooltip formatter={(v: number) => brl(v)} />
-                <Line isAnimationActive={false} type="monotone" dataKey="receita" stroke="#D90429" strokeWidth={2.5} dot={{ r: 3 }} />
+                <Line isAnimationActive={false} type="monotone" name="Receita" dataKey="receita" stroke="#D90429" strokeWidth={2.5} dot={{ r: 3 }} />
               </LineChart>
             </ChartBox>
           </div>
@@ -161,12 +169,12 @@ function Dashboard() {
           <div className="h-72">
             <ChartBox h={288}>
               <PieChart>
-                <Pie isAnimationActive={false} data={statusData} dataKey="value" nameKey="status" outerRadius={90} label>
+                <Pie isAnimationActive={false} data={statusData} dataKey="value" nameKey="label" outerRadius={90} label>
                   {statusData.map((d) => (
                     <Cell key={d.status} fill={STATUS_COLORS[d.status] ?? "#888"} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip formatter={(v: number, name: string) => [`${v} pedido(s)`, name]} />
                 <Legend />
               </PieChart>
             </ChartBox>
@@ -182,8 +190,8 @@ function Dashboard() {
               <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
               <XAxis dataKey="day" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
-              <Tooltip />
-              <Bar isAnimationActive={false} dataKey="pedidos" fill="#111111" radius={[4, 4, 0, 0]} />
+              <Tooltip formatter={(v: number) => [`${v} pedido(s)`, "Pedidos"]} />
+              <Bar isAnimationActive={false} name="Pedidos" dataKey="pedidos" fill="#111111" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ChartBox>
         </div>
